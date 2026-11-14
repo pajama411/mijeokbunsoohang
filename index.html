@@ -203,7 +203,7 @@ function path(g,points,color='#9d85ff',width=3,glow=14){if(points.length<2)retur
 function rainbow(g,points,w=4){if(points.length<2)return;const x0=points[0].x,x1=points[points.length-1].x,gradient=g.createLinearGradient(x0,0,x1===x0?x0+1:x1,0);gradient.addColorStop(0,'#ff65c9');gradient.addColorStop(.26,'#ba7fff');gradient.addColorStop(.51,'#6e83ff');gradient.addColorStop(.75,'#60d3ff');gradient.addColorStop(1,'#a9ffe4');g.save();g.beginPath();g.moveTo(points[0].x,points[0].y);for(let i=1;i<points.length;i++)g.lineTo(points[i].x,points[i].y);g.lineJoin='round';g.lineCap='round';g.shadowColor='#8b69ff';g.shadowBlur=26;g.strokeStyle=gradient;g.lineWidth=w+2;g.stroke();g.shadowBlur=0;g.strokeStyle=gradient;g.lineWidth=w;g.stroke();g.restore()}
 function poly(g,P,w,h,col='#a4a1c04d'){for(let i=0;i<P.length-1;i++)line(g,normalized(w,h,P[i]),normalized(w,h,P[i+1]),col,1.5,[5,5]);P.forEach((p,i)=>point(g,normalized(w,h,p),`P${i}`,i===0||i===P.length-1?'#b6baff':'#d19dff',4.8))}
 function pointerInside(e,c){const r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height}}
-function dragPoints(canvasId,points,transform){const canvas=$(canvasId);let index=-1;canvas.addEventListener('pointerdown',e=>{const p=pointerInside(e,canvas);let best=25;points.forEach((q,i)=>{const px=normalized(p.w,p.h,q);const dist=Math.hypot(p.x-px.x,p.y-px.y);if(dist<best){best=dist;index=i}});if(index>=0){canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';e.preventDefault()}});canvas.addEventListener('pointermove',e=>{const p=pointerInside(e,canvas);if(index>=0){const pos=denormalized(p.w,p.h,p.x,p.y);const q=transform?transform(pos,index):{x:clamp(pos.x,.015,.985),y:clamp(pos.y,.015,.985)};points[index].x=q.x;points[index].y=q.y}else{canvas.style.cursor=points.some(q=>{const pp=normalized(p.w,p.h,q);return Math.hypot(pp.x-p.x,pp.y-p.y)<20})?'grab':'crosshair'}});const stop=()=>{index=-1;canvas.style.cursor='crosshair'};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop)}
+function dragPoints(canvasId,points,transform){const canvas=$(canvasId);let index=-1;canvas.addEventListener('pointerdown',e=>{if(canvasId==='cubicCanvas'&&cubicView3d)return;const p=pointerInside(e,canvas);let best=25;points.forEach((q,i)=>{const px=normalized(p.w,p.h,q);const dist=Math.hypot(p.x-px.x,p.y-px.y);if(dist<best){best=dist;index=i}});if(index>=0){canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';e.preventDefault()}});canvas.addEventListener('pointermove',e=>{if(canvasId==='cubicCanvas'&&cubicView3d)return;const p=pointerInside(e,canvas);if(index>=0){const pos=denormalized(p.w,p.h,p.x,p.y);const q=transform?transform(pos,index):{x:clamp(pos.x,.015,.985),y:clamp(pos.y,.015,.985)};points[index].x=q.x;points[index].y=q.y}else{canvas.style.cursor=points.some(q=>{const pp=normalized(p.w,p.h,q);return Math.hypot(pp.x-p.x,pp.y-p.y)<20})?'grab':'crosshair'}});const stop=()=>{index=-1;canvas.style.cursor='crosshair'};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop)}
 // Hero: glossy rainbow ribbons drawn from animated cubic curves.
 function hero(ts){const s=surface('heroCanvas');if(!s)return;const{g,w,h}=s;g.clearRect(0,0,w,h);let time=ts/1000;const glow=g.createRadialGradient(w*.55,h*.50,20,w*.55,h*.50,w*.6);glow.addColorStop(0,'#19144288');glow.addColorStop(1,'#07061100');g.fillStyle=glow;g.fillRect(0,0,w,h);const palette=['#ff5be3','#a449ff','#6755ff','#33b8ff','#44f0cd','#dfff8e','#ff8ca8'];for(let k=0;k<8;k++){const sh=Math.sin(time*.34+k*.48)*h*.025;const st={x:w*(.12+k*.008),y:h*(.71-k*.017)+sh};const a={x:w*(.26+k*.016),y:h*(.10+k*.003)+sh};const b={x:w*(.70+k*.009),y:h*(.90-k*.016)+sh};const end={x:w*(.88-k*.009),y:h*(.25+k*.009)+sh};const pts=[];for(let j=0;j<=88;j++)pts.push(bez3([st,a,b,end],j/88));g.globalCompositeOperation='screen';path(g,pts,palette[k%palette.length],k===0?3.2:1.45,k===0?30:17)}g.globalCompositeOperation='source-over';const ellipse=g.createRadialGradient(w*.75,h*.24,0,w*.75,h*.24,w*.34);ellipse.addColorStop(0,'#8035ff27');ellipse.addColorStop(1,'#00000000');g.fillStyle=ellipse;g.fillRect(0,0,w,h);}
 // Line interpolation
@@ -219,7 +219,60 @@ const updateQuad=sliderPlay({slider:'quadSlider',button:'quadPlay',model:quadMod
 const cubicInitial=[{x:.10,y:.83},{x:.28,y:.06},{x:.68,y:.89},{x:.91,y:.17}];
 const cubicModel={pts:cubicInitial.map(p=>({...p})),t:.43,play:false};
 const cubicLayers={curve:true,control:true,first:true,second:true,final:true,tangent:false,grid:true,labels:true};let cubicSpeed=1;
+
+let cubicView3d=false,cubicStepIndex=3;
+const orbit3d={yaw:-.61,pitch:.56,zoom:1,depth:1,active:false,x:0,y:0};
+function bezierVelocity(t){const P=cubicModel.pts,u=1-t;return{x:3*u*u*(P[1].x-P[0].x)+6*u*t*(P[2].x-P[1].x)+3*t*t*(P[3].x-P[2].x),y:3*u*u*(P[1].y-P[0].y)+6*u*t*(P[2].y-P[1].y)+3*t*t*(P[3].y-P[2].y)}}
+function bezierSpeed(t){const v=bezierVelocity(t);return Math.hypot(v.x,v.y)}
+function drawCubic3D(){
+ const a=surface('cubicCanvas');if(!a)return;const{g,w,h}=a,P=cubicModel.pts,t=cubicModel.t;
+ g.fillStyle='#050914';g.fillRect(0,0,w,h);
+ const aura=g.createRadialGradient(w*.53,h*.37,10,w*.53,h*.37,w*.65);
+ aura.addColorStop(0,'#2e1b5955');aura.addColorStop(1,'#00000000');g.fillStyle=aura;g.fillRect(0,0,w,h);
+ const sc=Math.min(w*.72,h*.97)*orbit3d.zoom,cy=h*.69,yaw=orbit3d.yaw,pitch=orbit3d.pitch;
+ const proj=(x,y,z=0)=>{const xx=(x-.5)*1.5,yy=(.5-y)*1.2;
+   const ax=xx*Math.cos(yaw)-yy*Math.sin(yaw),ay=xx*Math.sin(yaw)+yy*Math.cos(yaw);
+   return{x:w*.52+ax*sc,y:cy+(ay*Math.sin(pitch)-z*Math.cos(pitch))*sc}};
+ for(let i=0;i<=10;i++){const u=i/10;line(g,proj(u,0),proj(u,1),'#5670b52b',1);line(g,proj(0,u),proj(1,u),'#5670b52b',1)}
+ const maxSp=Math.max(.001,...Array.from({length:101},(_,i)=>bezierSpeed(i/100)));
+ const zOf=q=>(.04+.77*bezierSpeed(q)/maxSp)*orbit3d.depth;
+ const curve=[],floor=[];
+ for(let i=0;i<=150;i++){const q=i/150,p=bez3(P,q);curve.push(proj(p.x,p.y,zOf(q)));floor.push(proj(p.x,p.y,0))}
+ path(g,floor,'#91a4fb6b',1.6,8);
+ for(let i=1;i<curve.length;i++){const hue=290-i/150*125;
+  line(g,curve[i-1],curve[i],`hsla(${hue},100%,70%,.16)`,10);
+  line(g,curve[i-1],curve[i],`hsla(${hue},100%,76%,.96)`,3.2)}
+ const q=bez3(P,t),marker=proj(q.x,q.y,zOf(t)),ground=proj(q.x,q.y,0);
+ line(g,ground,marker,'#80efffd8',1.8,[5,4]);point(g,ground,'','#6d76b8',4);point(g,marker,'Q(t)','#aaffee',8.7);
+ const base=proj(0,0),right=proj(1,0),top=proj(0,1),vert=proj(0,0,orbit3d.depth);
+ line(g,base,right,'#ad96f2bb',1.5);line(g,base,top,'#7dbddcbb',1.5);line(g,base,vert,'#a7f8e5bb',1.5);
+ g.font='11px ui-monospace,monospace';g.fillStyle='#acbbd9';g.fillText('x',right.x+6,right.y);g.fillText('y',top.x+6,top.y);
+ g.fillStyle='#a4ffdc';g.fillText('z = |B′(t)|  [normalized]',Math.min(w-191,Math.max(10,vert.x+8)),Math.max(17,vert.y-7));
+ g.fillStyle='#a4b3cc';g.fillText('DRAG TO ORBIT · WHEEL TO ZOOM',14,h-16);
+ $('cubicStepText').textContent=`t=${f2(t)} · SPEED=${bezierSpeed(t).toFixed(3)} · HEIGHT ∝ |B′(t)|`;
+}
+function setCubicView(on){
+ cubicView3d=on;
+ for(const [id,sel] of [['cubicView2D',!on],['cubicView3D',on]]){$(id).classList.toggle('on',sel);$(id).setAttribute('aria-pressed',String(sel))}
+ $('depthControl').hidden=!on;$('cubicStepBtn').disabled=on;$('cubicCanvas').style.cursor=on?'grab':'crosshair';
+ $('cubicHint').textContent=on?'3D: x,y=POSITION · z=|B′(t)| (NORMALIZED)':'DRAG P₀–P₃ · A/B/C → D/E → Q(t)';
+}
+$('cubicView2D').onclick=()=>setCubicView(false);$('cubicView3D').onclick=()=>setCubicView(true);
+$('cubicDepth').oninput=e=>{orbit3d.depth=+e.target.value;$('cubicDepthOut').textContent=orbit3d.depth.toFixed(2)+'×'};
+const orbitCanvas=$('cubicCanvas');
+orbitCanvas.addEventListener('pointerdown',e=>{if(!cubicView3d)return;orbit3d.active=true;orbit3d.x=e.clientX;orbit3d.y=e.clientY;orbitCanvas.setPointerCapture(e.pointerId);orbitCanvas.style.cursor='grabbing'});
+orbitCanvas.addEventListener('pointermove',e=>{if(!cubicView3d||!orbit3d.active)return;orbit3d.yaw+=(e.clientX-orbit3d.x)*.009;orbit3d.pitch=clamp(orbit3d.pitch+(e.clientY-orbit3d.y)*.007,.17,1.25);orbit3d.x=e.clientX;orbit3d.y=e.clientY});
+for(const type of ['pointerup','pointercancel'])orbitCanvas.addEventListener(type,()=>{orbit3d.active=false;if(cubicView3d)orbitCanvas.style.cursor='grab'});
+orbitCanvas.addEventListener('wheel',e=>{if(!cubicView3d)return;e.preventDefault();orbit3d.zoom=clamp(orbit3d.zoom*(e.deltaY>0?.93:1.07),.6,1.65)},{passive:false});
+$('cubicStepBtn').onclick=()=>{
+ if(cubicView3d)setCubicView(false);cubicStepIndex=cubicStepIndex%3+1;
+ cubicLayers.first=cubicStepIndex>=1;cubicLayers.second=cubicStepIndex>=2;cubicLayers.final=cubicStepIndex>=3;
+ for(const key of ['first','second','final']){const input=document.querySelector('[data-layer="'+key+'"]');if(input)input.checked=cubicLayers[key]}
+ $('cubicStepBtn').textContent='STEP '+cubicStepIndex+' / 3';
+};
+
 function drawCubic(){
+ if(cubicView3d){drawCubic3D();return}
  const s=surface('cubicCanvas');if(!s)return;
  const {g,w,h}=s,P=cubicModel.pts,t=cubicModel.t,show=cubicLayers,to=p=>normalized(w,h,p);
  frame(g,w,h,show.grid);
