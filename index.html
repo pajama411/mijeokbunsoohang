@@ -343,7 +343,47 @@ function drawCalc(){
  const v=calc.y,A=-v[0]+3*v[1]-3*v[2]+v[3],B=3*v[0]-6*v[1]+3*v[2],C=3*(v[1]-v[0]),D=v[0];
  $('polyLive').textContent=A.toFixed(2)+'t³ '+(B<0?'− ':'+ ')+Math.abs(B).toFixed(2)+'t² '+(C<0?'− ':'+ ')+Math.abs(C).toFixed(2)+'t + '+D.toFixed(2);
 }
-function drawDerivative(){const s=surface('derivCanvas');if(!s)return;const{g,w,h}=s;g.fillStyle='#080c19';g.fillRect(0,0,w,h);const left=Math.min(58,w*.12),right=w-left,top=13,bottom=h-12;let vals=[];for(let i=0;i<=120;i++)vals.push(cD(i/120));const max=Math.max(1,Math.max(...vals.map(Math.abs))*1.15);const project=(t,d)=>({x:mix(left,right,t),y:mix(bottom,top,(d+max)/(2*max))});line(g,project(0,0),project(1,0),'#ffffff30',1);const pts=[];for(let i=0;i<=120;i++)pts.push(project(i/120,vals[i]));path(g,pts,'#b69cff',2.5,12);const pp=project(calc.t,cD(calc.t));line(g,{x:pp.x,y:top},{x:pp.x,y:bottom},'#87f9ed6a',1,[3,3]);point(g,pp,'','#8effe3',4)}
+
+let calcChartMode='derivative';
+document.querySelectorAll('[data-chart]').forEach(btn=>btn.addEventListener('click',()=>{
+ calcChartMode=btn.dataset.chart;
+ document.querySelectorAll('[data-chart]').forEach(b=>{const selected=b===btn;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',String(selected))});
+}));
+function drawDerivative(){
+ const s=surface('derivCanvas');if(!s)return;const{g,w,h}=s;g.fillStyle='#080c19';g.fillRect(0,0,w,h);
+ const t=calc.t,dy=cD(t),step=t+calc.h<=1?calc.h:-calc.h,avg=(cY(t+step)-cY(t))/step;
+ if(calcChartMode==='compare'){
+  const lim=Math.max(1,Math.abs(avg),Math.abs(dy))*1.15,zero=w*.51,k=w*.38/lim;
+  line(g,{x:zero,y:6},{x:zero,y:h-7},'#ffffff50',1);
+  for(const [i,value,color,label] of [[0,avg,'#76caff','AVERAGE'],[1,dy,'#baffeb',"f'(t)"]]){
+   const y=i?h*.75:h*.31,width=Math.abs(value*k);
+   g.fillStyle=color;g.shadowColor=color;g.shadowBlur=11;g.fillRect(value<0?zero-width:zero,y-8,width,14);g.shadowBlur=0;
+   g.fillStyle='#afbad1';g.font='10px ui-monospace,monospace';
+   g.fillText(label,7,y+2);g.fillText(value.toFixed(3),Math.min(w-58,Math.max(6,zero+value*k+7)),y+3);
+  }return;
+ }
+ const left=47,right=w-24,top=11,bottom=h-16,pts=[];
+ if(calcChartMode==='error'){
+  const vals=[];
+  for(let i=0;i<=80;i++){const d=.005+i/80*.275,sgn=t+d<=1?d:-d;vals.push(Math.abs((cY(t+sgn)-cY(t))/sgn-dy))}
+  const maxV=Math.max(.00001,...vals)*1.1;
+  const project=(d,v)=>({x:mix(left,right,(d-.005)/.275),y:mix(bottom,top,v/maxV)});
+  line(g,{x:left,y:bottom},{x:right,y:bottom},'#ffffff38',1);
+  for(let i=0;i<=80;i++)pts.push(project(.005+i/80*.275,vals[i]));
+  path(g,pts,'#89cbff',2.7,10);
+  point(g,project(calc.h,Math.abs(avg-dy)),'','#b2ffe7',5);
+  g.fillStyle='#a4aecb';g.font='10px ui-monospace,monospace';
+  g.fillText('Δt →',right-36,h-3);g.fillText('error',7,14);return;
+ }
+ const vals=[];for(let i=0;i<=120;i++)vals.push(cD(i/120));
+ const mx=Math.max(1,...vals.map(Math.abs))*1.15;
+ const project=(tt,v)=>({x:mix(left,right,tt),y:mix(bottom,top,(v+mx)/(2*mx))});
+ line(g,project(0,0),project(1,0),'#ffffff35',1);
+ for(let i=0;i<=120;i++)pts.push(project(i/120,vals[i]));
+ path(g,pts,'#b69cff',2.7,12);
+ const pos=project(t,dy);line(g,{x:pos.x,y:top},{x:pos.x,y:bottom},'#87f9ed6a',1,[3,3]);point(g,pos,'','#8effe3',4);
+ g.fillStyle='#a4aecb';g.font='10px ui-monospace,monospace';g.fillText("f'(t)",7,15);
+}
 $('calcSlider').oninput=e=>{calc.t=+e.target.value;$('calcValue').textContent=f2(calc.t)};
 $('calcHSlider').oninput=e=>{calc.h=+e.target.value;$('calcHValue').textContent=calc.h.toFixed(3)};
 function dragCalc(){const c=$('calcCanvas');let dragging=-1;c.addEventListener('pointerdown',e=>{const m=pointerInside(e,c);let best=24;calc.y.forEach((y,i)=>{const p=calcCoords(m.w,m.h,i/3,y),dist=Math.hypot(p.x-m.x,p.y-m.y);if(dist<best){best=dist;dragging=i}});if(dragging>=0)c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{const m=pointerInside(e,c);if(dragging>=0){const top=35,bottom=m.h-40;calc.y[dragging]=clamp((bottom-m.y)/(bottom-top),.02,.98)}else{c.style.cursor=calc.y.some((y,i)=>{const p=calcCoords(m.w,m.h,i/3,y);return Math.hypot(p.x-m.x,p.y-m.y)<20})?'ns-resize':'crosshair'}});const stop=()=>dragging=-1;c.addEventListener('pointerup',stop);c.addEventListener('pointercancel',stop)}dragCalc();
