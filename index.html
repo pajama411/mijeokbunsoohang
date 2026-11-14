@@ -115,6 +115,7 @@ body.edit-mode .notes-edit{display:block}
  .deck.snap-mode .slide{height:auto;min-height:100%;flex:0 0 auto;align-items:flex-start;padding:24px 0 30px}
 }
 
+body.lang-en .notes-edit{display:none}
 </style>
 </head>
 <body>
@@ -201,7 +202,7 @@ const timeTotal=slides.reduce((s,e)=>s+Number(e.dataset.seconds),0);
 let elapsed=0,started=false,startStamp=0,elapsedBefore=0;
 slides.forEach((s,i)=>{const b=document.createElement('button');b.className='chapter-dot';b.setAttribute('aria-label',`${i+1}번 슬라이드 ${s.dataset.chapter}`);b.onclick=()=>go(i);progress.append(b)});
 function notes(){notesOn=!notesOn;$('notes').classList.toggle('open',notesOn);$('notesBtn').textContent=notesOn?'CLOSE NOTES':'NOTES';syncNotes()}
-function syncNotes(){const s=slides[page];$('notesHead').textContent=`SPEAKER SCRIPT · ${String(page+1).padStart(2,'0')} / ${slides.length} · ${s.dataset.seconds}s`;$('notesText').textContent=s.dataset.note;if($('notesEdit')&&document.activeElement!==$('notesEdit'))$('notesEdit').value=s.dataset.note}
+function syncNotes(){const s=slides[page];$('notesEdit').hidden=lang==='en';$('notesHead').textContent=`SPEAKER SCRIPT · ${String(page+1).padStart(2,'0')} / ${slides.length} · ${s.dataset.seconds}s`;$('notesText').textContent=lang==='en'?englishNotes[page]:s.dataset.note;if($('notesEdit')&&document.activeElement!==$('notesEdit'))$('notesEdit').value=s.dataset.note}
 function go(n,fromScroll=false){n=clamp(n,0,slides.length-1);if(n!==page&&document.body.classList.contains('cubic-focus')){document.body.classList.remove('cubic-focus');$('cubicFocus').textContent='⛶ EXPAND';$('cubicFocus').setAttribute('aria-expanded','false')}if(!started&&page===0&&n>0){started=true;startStamp=performance.now();elapsedBefore=Number(slides[0].dataset.seconds)}slides[page].classList.remove('active');page=n;slides[page].classList.add('active');document.querySelectorAll('.chapter-dot').forEach((d,i)=>d.className='chapter-dot'+(i===page?' current':i<page?' done':''));$('chapter').textContent=`${slides[page].dataset.chapter} / THE ART OF A CURVE`;$('stepcount').textContent=`${String(page+1).padStart(2,'0')} / 07`;$('prev').disabled=page===0;$('next').disabled=page===slides.length-1;syncNotes();if(snapMode){if(!fromScroll)$('deck').scrollTo({top:slides[n].offsetTop,behavior:'smooth'})}else window.scrollTo(0,0)}
 $('snapBtn').onclick=()=>{snapMode=!snapMode;const d=$('deck');d.classList.toggle('snap-mode',snapMode);$('snapBtn').classList.toggle('on',snapMode);$('snapBtn').setAttribute('aria-pressed',String(snapMode));$('snapBtn').textContent=snapMode?'⇵ ON':'⇵ SNAP';if(snapMode)requestAnimationFrame(()=>d.scrollTo({top:slides[page].offsetTop,behavior:'instant'}));};
 let scrollSettled=0;$('deck').addEventListener('scroll',()=>{if(!snapMode)return;cancelAnimationFrame(scrollSettled);scrollSettled=requestAnimationFrame(()=>{const d=$('deck'),mid=d.scrollTop+d.clientHeight*.38;let index=0;for(let i=0;i<slides.length;i++)if(slides[i].offsetTop<=mid)index=i;if(index!==page)go(index,true)})},{passive:true});
@@ -435,7 +436,7 @@ editableItems.forEach(el=>{
  el.addEventListener('input',saveEdits);
  el.addEventListener('paste',event=>{if(!editing)return;event.preventDefault();document.execCommand('insertText',false,event.clipboardData.getData('text/plain'))});
 });
-$('editBtn').onclick=()=>setEditMode(!editing);
+$('editBtn').onclick=()=>{if(lang==='en')switchLang();setEditMode(!editing)};
 $('notesEdit').addEventListener('input',e=>{slides[page].dataset.note=e.target.value;$('notesText').textContent=e.target.value;saveEdits()});
 $('resetCopyBtn').onclick=()=>{if(!confirm('모든 슬라이드 문구와 발표 대본을 초기 문구로 되돌릴까요?'))return;editableItems.forEach((el,i)=>el.innerHTML=originalCopy[i]);slides.forEach((slide,i)=>slide.dataset.note=originalNotes[i]);syncNotes();saveEdits()};
 $('exportBtn').onclick=()=>{
@@ -450,6 +451,62 @@ $('exportBtn').onclick=()=>{
  const html='<!DOCTYPE html>\n'+clone.outerHTML,blob=new Blob([html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download='curve-studio-my-presentation.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
 };
+
+/* Bilingual display: keep Korean text and local edits intact, show English on demand. */
+const englishNotes=[
+ 'A straight line comes from joining two points. What if we interpolate the points repeatedly? We will see how this creates Bézier curves, and how Calculus I explains their change.',
+ 'A point between two endpoints is L(t)=(1−t)P0+tP1. At t=0 it is the first endpoint; at t=1 it is the other. This is a linear function of t.',
+ 'Add a third control point. Construct A on the first segment and B on the second, then interpolate A and B again. The moving point Q traces a quadratic Bézier curve.',
+ 'With four control points, first form A,B,C, then D,E, and finally Q. Repeated linear interpolation produces a cubic polynomial in t. Drag the points to investigate.',
+ 'For Calculus I, we fix control-point x values at 0,1/3,2/3,1 so x=t. The vertical coordinate is a cubic polynomial f(t). Reduce delta t and watch the average slope approach the instantaneous derivative. The derivative is a quadratic polynomial, shown in the chart. This gives the tangent line.',
+ 'CSS cubic-bezier controls progress over time. Even for the same distance and duration, the instantaneous speed can change. Compare the two animations.',
+ 'I learned that repeated linear interpolation makes polynomial curves. By comparing secants and tangents, I understood the derivative as a limit of average rates of change, not just a memorized formula.'
+];
+const englishCopy=[
+ {'.hero h1':'THE ART<br>OF A<br><span class="spectrum">CURVE.</span>','.hero .body':'Create a curve from moving lines.<br><strong>Explain its change with Calculus I.</strong>','.hero-bottom':'2022 CALCULUS I &nbsp; <span>×</span> &nbsp; BÉZIER CURVES'},
+ {'.copy .h2':'Joining two points<br>makes <span class="spectrum">a straight line.</span>','.copy .body':'Take <strong>(1−t) times the left endpoint + t times the right endpoint</strong>. As t moves from 0 to 1, the new point travels along the line.','.copy .microline':'CALCULUS I · linear function · constant rate of change','.copy .math-tag':'LINEAR INTERPOLATION'},
+ {'.copy .h2':'Add one more point.<br><span class="spectrum">Repeat the same idea.</span>','.copy .body':'Make point <strong>A</strong> on P₀–P₁ and point <strong>B</strong> on P₁–P₂. Interpolate between A and B once more: the moving point <strong>Q(t)</strong> traces a curve.','.copy .microline':'CALCULUS I · quadratic polynomial → linear derivative'},
+ {'.copy .h2':'Repeat once again.<br><span class="spectrum">Now it is a cubic.</span>','.copy .body':'With four control points, construct <strong>A/B/C → D/E → Q(t)</strong>. As t changes, the path of Q(t) forms a cubic Bézier curve.','.copy .microline':'CALCULUS I · cubic polynomial → quadratic derivative'},
+ {'.copy .h2':'What happens<br><span class="spectrum">when we differentiate?</span>','.copy .body':'Fix the x-coordinates of the control points at <strong>0, ⅓, ⅔, 1</strong> so <strong>x(t)=t</strong>. Then y is a cubic polynomial. Move the points and watch the <strong>secant slope approach the tangent slope</strong>.','.calc-copy .formula:nth-of-type(1) .formula-top':'CUBIC POLYNOMIAL · CALCULUS I','.limit-line span':'AVERAGE RATE → DERIVATIVE AS A LIMIT','.calc-copy .formula:nth-of-type(2) .formula-top':'DERIVATIVE · TANGENT LINE'},
+ {'.copy .h2':'Calculus in action.<br><span class="spectrum">Designing motion.</span>','.copy .body':'CSS uses Bézier curves to control <strong>progress over time</strong>. The slope of the progress curve describes the <strong>instantaneous rate of change</strong>.','.copy .microline':'DRAG THE TWO CONTROL HANDLES'},
+ {'.ending h2':'From lines to curves.<br><span class="spectrum">Explained through calculus.</span>','.ending-card:nth-child(1) .num':'01 · WHAT I LEARNED','.ending-card:nth-child(1) h3':'Curves are repeated interpolation','.ending-card:nth-child(1) p':'Repeating a simple linear calculation creates Bézier curves described by quadratic and cubic polynomials.','.ending-card:nth-child(2) .num':'02 · CALCULUS I CONNECTION','.ending-card:nth-child(2) h3':'Derivatives explain change','.ending-card:nth-child(2) p':'The average rate approaches the instantaneous rate; a cubic polynomial can be differentiated to find the slope of its tangent.','.ending-card:nth-child(3) .num':'03 · REFLECTION','.ending-card:nth-child(3) h3':'Math is part of visual design','.ending-card:nth-child(3) p':'By moving control points and watching the curve and derivative change together, I realized that calculus can explain what we see on a screen.'}
+];
+const englishUI={
+ '#cubicLayers label:nth-child(1) span':'Curve',
+ '#cubicLayers label:nth-child(2) span':'Control polygon',
+ '#cubicLayers label:nth-child(3) span':'Stage 1 · A/B/C',
+ '#cubicLayers label:nth-child(4) span':'Stage 2 · D/E',
+ '#cubicLayers label:nth-child(5) span':'Q(t) and trail',
+ '#cubicLayers label:nth-child(6) span':'Tangent',
+ '#cubicLayers label:nth-child(7) span':'Grid',
+ '#cubicLayers label:nth-child(8) span':'Labels',
+ '.chart-tabs .chart-tab:nth-child(1)':"f′(t) curve",
+ '.chart-tabs .chart-tab:nth-child(2)':'Δt error',
+ '.chart-tabs .chart-tab:nth-child(3)':'Compare slopes',
+ '.slide:nth-child(5) .calc-controls .controls:nth-child(1) label':'Position t',
+ '.slide:nth-child(5) .calc-controls .controls:nth-child(2) label':'Gap Δt → 0',
+ '.slide:nth-child(7) .ease-bottom .small':'Same time · different rate of change'
+};
+let translationBackup=[];
+function switchLang(){
+ if(editing)setEditMode(false);
+ if(lang==='ko'){
+  translationBackup=[];
+  englishCopy.forEach((entries,i)=>Object.entries(entries).forEach(([selector,markup])=>{
+   const el=slides[i].querySelector(selector);if(el){translationBackup.push([el,el.innerHTML]);el.innerHTML=markup}
+  }));
+  Object.entries(englishUI).forEach(([selector,markup])=>{
+   const el=document.querySelector(selector);if(el){translationBackup.push([el,el.innerHTML]);el.innerHTML=markup}
+  });
+  lang='en';document.documentElement.lang='en';document.body.classList.add('lang-en');$('langBtn').textContent='KO';
+ }else{
+  translationBackup.forEach(([el,markup])=>el.innerHTML=markup);translationBackup=[];
+  lang='ko';document.documentElement.lang='ko';document.body.classList.remove('lang-en');$('langBtn').textContent='EN';
+ }
+ syncNotes();$('langBtn').setAttribute('aria-label',lang==='ko'?'Switch to English':'한국어로 전환');
+}
+$('langBtn').onclick=switchLang;
+
 readEdits();syncNotes();
 
 let last=0;const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
