@@ -99,6 +99,22 @@ body.edit-mode .notes-edit{display:block}
 .calc-deriv{height:95px}
 @media(max-width:780px){.view-tab{padding:5px 7px;font-size:9px}.chart-tab{flex:1;font-size:9px;padding:7px 4px}.cubic-stage .controls{gap:7px}.cubic-stage .controls .ui-btn{padding:8px 9px;font-size:10px}.depth-control{min-width:0;flex:1}.calc-deriv{height:105px}}
 
+
+/* Page snapping preserves native keyboard navigation and adds a scrollable presentation mode. */
+.nav-utility{border:1px solid #8275ae88;border-radius:9px;padding:8px 10px;color:#b5cee8;background:#17152c;font:10px var(--mono);letter-spacing:.04em;cursor:pointer;white-space:nowrap}
+.nav-utility:hover,.nav-utility.on{color:#eafff9;background:linear-gradient(115deg,#523c85,#2a4f78);border-color:#a5cafe}
+.deck.snap-mode{display:flex;flex-direction:column;overflow-y:auto;scroll-snap-type:y mandatory;scroll-behavior:smooth;overscroll-behavior-y:contain;scrollbar-gutter:stable}
+.deck.snap-mode .slide{display:flex;flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;animation:none}
+@media(max-width:780px){
+ .topbar{height:auto;min-height:58px;flex-wrap:wrap;padding:9px 0;gap:8px}
+ .top-center{min-width:80px}.top-actions{width:100%;justify-content:flex-end;flex-wrap:wrap}
+ .footer .chapter{display:none}.footer-right{width:100%;justify-content:space-between;gap:6px}
+ .footer-right .nav{width:36px}.nav-utility{padding:7px 9px}
+ #app:has(.deck.snap-mode){height:100dvh;min-height:0;overflow:hidden}
+ .deck.snap-mode{scroll-snap-type:y proximity;overflow-y:auto;overflow-x:hidden;min-height:0}
+ .deck.snap-mode .slide{height:auto;min-height:100%;flex:0 0 auto;align-items:flex-start;padding:24px 0 30px}
+}
+
 </style>
 </head>
 <body>
@@ -168,7 +184,7 @@ body.edit-mode .notes-edit{display:block}
  <div class="ending-glow"></div><div class="ending"><div class="eyebrow"><span class="beam"></span>06 / WHAT I LEARNED</div><h2>직선에서 곡선까지.<br><span class="spectrum">미분으로 설명했다.</span></h2><div class="ending-grid"><div class="ending-card"><div class="num">01 · 새롭게 배운 점</div><h3>곡선은 ‘점 사이의 계산’이었다</h3><p>직선의 선형 보간을 반복하면 2차·3차다항식으로 표현되는 베지어 곡선이 만들어진다는 것을 배웠다.</p></div><div class="ending-card"><div class="num">02 · 미적분 I과의 연결</div><h3>도함수는 곡선의 변화를 보여준다</h3><p>평균변화율이 순간변화율로 수렴하고, 3차다항함수의 도함수로 접선 기울기를 계산할 수 있음을 확인했다.</p></div><div class="ending-card"><div class="num">03 · 느낀 점</div><h3>수학은 디자인과 멀리 있지 않았다</h3><p>제어점을 움직이면 곡선과 도함수가 함께 변하는 모습을 보며, 수업에서 배운 미분이 실제 화면의 모양을 설명한다는 점이 인상 깊었다.</p></div></div><div class="source">INSPIRED BY <a href="https://codingapple.com/blog/bezier-curve/" target="_blank" rel="noopener noreferrer">CODINGAPPLE / 베지어 곡선 직접 만져보기</a> &nbsp;·&nbsp; CSS REFERENCE <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/easing-function/cubic-bezier" target="_blank" rel="noopener noreferrer">MDN</a></div></div>
 </section>
 </main>
-<footer class="footer"><div class="chapter" id="chapter">INTRO / THE ART OF A CURVE</div><div class="footer-right"><span class="stepcount" id="stepcount">01 / 07</span><button class="nav" id="prev" aria-label="이전 슬라이드">←</button><button class="nav" id="next" aria-label="다음 슬라이드">→</button></div></footer>
+<footer class="footer"><div class="chapter" id="chapter">INTRO / THE ART OF A CURVE</div><div class="footer-right"><button class="nav-utility" id="langBtn" aria-label="한영 번역 전환">EN</button><button class="nav-utility" id="snapBtn" aria-pressed="false" title="스크롤하여 한 장씩 정렬하는 페이지 스냅 켜기">⇵ SNAP</button><span class="stepcount" id="stepcount">01 / 07</span><button class="nav" id="prev" aria-label="이전 슬라이드">←</button><button class="nav" id="next" aria-label="다음 슬라이드">→</button></div></footer>
 </div>
 <div class="notes" id="notes"><div class="notes-head" id="notesHead">PRESENTER NOTES</div><div class="notes-text" id="notesText"></div><textarea class="notes-edit" id="notesEdit" aria-label="현재 슬라이드 발표 대본 직접 수정"></textarea><div class="notes-foot">N : 닫기 &nbsp;·&nbsp; ← → : 슬라이드 &nbsp;·&nbsp; F : 전체 화면</div></div>
 <div class="edit-toast" id="editToast" role="status" aria-live="polite">✎ EDIT MODE · 제목·본문·수식을 클릭해 수정 · 자동 저장</div>
@@ -180,13 +196,15 @@ const lerp=(p,q,t)=>({x:mix(p.x,q.x,t),y:mix(p.y,q.y,t)});
 const bez2=(P,t)=>lerp(lerp(P[0],P[1],t),lerp(P[1],P[2],t),t);
 const bez3=(P,t)=>lerp(lerp(lerp(P[0],P[1],t),lerp(P[1],P[2],t),t),lerp(lerp(P[1],P[2],t),lerp(P[2],P[3],t),t),t);
 const f2=n=>Number(n).toFixed(2);
-const slides=[...document.querySelectorAll('.slide')],progress=$('progress');let page=0,notesOn=false;
+const slides=[...document.querySelectorAll('.slide')],progress=$('progress');let page=0,notesOn=false,lang='ko',snapMode=false;
 const timeTotal=slides.reduce((s,e)=>s+Number(e.dataset.seconds),0);
 let elapsed=0,started=false,startStamp=0,elapsedBefore=0;
 slides.forEach((s,i)=>{const b=document.createElement('button');b.className='chapter-dot';b.setAttribute('aria-label',`${i+1}번 슬라이드 ${s.dataset.chapter}`);b.onclick=()=>go(i);progress.append(b)});
 function notes(){notesOn=!notesOn;$('notes').classList.toggle('open',notesOn);$('notesBtn').textContent=notesOn?'CLOSE NOTES':'NOTES';syncNotes()}
 function syncNotes(){const s=slides[page];$('notesHead').textContent=`SPEAKER SCRIPT · ${String(page+1).padStart(2,'0')} / ${slides.length} · ${s.dataset.seconds}s`;$('notesText').textContent=s.dataset.note;if($('notesEdit')&&document.activeElement!==$('notesEdit'))$('notesEdit').value=s.dataset.note}
-function go(n){n=clamp(n,0,slides.length-1);if(n!==page&&document.body.classList.contains('cubic-focus')){document.body.classList.remove('cubic-focus');$('cubicFocus').textContent='⛶ EXPAND';$('cubicFocus').setAttribute('aria-expanded','false')}if(!started&&page===0&&n>0){started=true;startStamp=performance.now();elapsedBefore=Number(slides[0].dataset.seconds)}slides[page].classList.remove('active');page=n;slides[page].classList.add('active');document.querySelectorAll('.chapter-dot').forEach((d,i)=>d.className='chapter-dot'+(i===page?' current':i<page?' done':''));$('chapter').textContent=`${slides[page].dataset.chapter} / THE ART OF A CURVE`;$('stepcount').textContent=`${String(page+1).padStart(2,'0')} / 07`;$('prev').disabled=page===0;$('next').disabled=page===slides.length-1;syncNotes();window.scrollTo(0,0)}
+function go(n,fromScroll=false){n=clamp(n,0,slides.length-1);if(n!==page&&document.body.classList.contains('cubic-focus')){document.body.classList.remove('cubic-focus');$('cubicFocus').textContent='⛶ EXPAND';$('cubicFocus').setAttribute('aria-expanded','false')}if(!started&&page===0&&n>0){started=true;startStamp=performance.now();elapsedBefore=Number(slides[0].dataset.seconds)}slides[page].classList.remove('active');page=n;slides[page].classList.add('active');document.querySelectorAll('.chapter-dot').forEach((d,i)=>d.className='chapter-dot'+(i===page?' current':i<page?' done':''));$('chapter').textContent=`${slides[page].dataset.chapter} / THE ART OF A CURVE`;$('stepcount').textContent=`${String(page+1).padStart(2,'0')} / 07`;$('prev').disabled=page===0;$('next').disabled=page===slides.length-1;syncNotes();if(snapMode){if(!fromScroll)$('deck').scrollTo({top:slides[n].offsetTop,behavior:'smooth'})}else window.scrollTo(0,0)}
+$('snapBtn').onclick=()=>{snapMode=!snapMode;const d=$('deck');d.classList.toggle('snap-mode',snapMode);$('snapBtn').classList.toggle('on',snapMode);$('snapBtn').setAttribute('aria-pressed',String(snapMode));$('snapBtn').textContent=snapMode?'⇵ ON':'⇵ SNAP';if(snapMode)requestAnimationFrame(()=>d.scrollTo({top:slides[page].offsetTop,behavior:'instant'}));};
+let scrollSettled=0;$('deck').addEventListener('scroll',()=>{if(!snapMode)return;cancelAnimationFrame(scrollSettled);scrollSettled=requestAnimationFrame(()=>{const d=$('deck'),mid=d.scrollTop+d.clientHeight*.38;let index=0;for(let i=0;i<slides.length;i++)if(slides[i].offsetTop<=mid)index=i;if(index!==page)go(index,true)})},{passive:true});
 $('prev').onclick=()=>go(page-1);$('next').onclick=()=>go(page+1);$('heroStart').onclick=()=>go(1);$('notesBtn').onclick=notes;
 $('fullBtn').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.()};
 window.addEventListener('keydown',e=>{if(document.activeElement?.isContentEditable||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowRight'||e.key===' '){go(page+1);e.preventDefault()}else if(e.key==='ArrowLeft'){go(page-1);e.preventDefault()}else if(e.key.toLowerCase()==='n')notes();else if(e.key.toLowerCase()==='f')$('fullBtn').click();else if(e.key.toLowerCase()==='e')$('editBtn').click();else if(e.key.toLowerCase()==='z'&&page===3)$('cubicFocus').click();else if(e.key==='Escape'&&document.body.classList.contains('cubic-focus'))$('cubicFocus').click()});
@@ -408,7 +426,7 @@ const editableItems=[...document.querySelectorAll(editSelector)].filter(node=>!n
 editableItems.forEach((el,i)=>el.dataset.editId=String(i));
 const originalCopy=editableItems.map(el=>el.innerHTML);
 const originalNotes=slides.map(slide=>slide.dataset.note);
-const editStorage='curve-studio-v3:'+location.pathname;
+const editStorage='curve-studio-v4:'+location.pathname;
 let editing=false;
 function readEdits(){try{const saved=JSON.parse(localStorage.getItem(editStorage)||'null');if(!saved)return;for(const [i,markup] of Object.entries(saved.items||{})){if(editableItems[i]&&typeof markup==='string')editableItems[i].innerHTML=markup}for(const [i,note]of Object.entries(saved.notes||{})){if(slides[i]&&typeof note==='string')slides[i].dataset.note=note}}catch(err){console.warn('Autosave unavailable',err)}}
 function saveEdits(){try{localStorage.setItem(editStorage,JSON.stringify({items:Object.fromEntries(editableItems.map((el,i)=>[i,el.innerHTML])),notes:Object.fromEntries(slides.map((s,i)=>[i,s.dataset.note]))}))}catch(err){console.warn('Storage full or disabled',err)}}
