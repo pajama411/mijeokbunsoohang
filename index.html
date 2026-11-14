@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>THE ART OF A CURVE — 미적분 I × Bézier</title>
+<style>
+:root{--bg:#020207;--surface:#0b0c16;--line:#35314c;--white:#f7f6fe;--sub:#acacc3;--low:#73768d;--pink:#ff4acb;--purple:#9960ff;--blue:#4b83ff;--cyan:#4be8f4;--lime:#d5f899;--font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--white);font-family:var(--font);overflow:hidden}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #7dfdff;outline-offset:3px}a{color:#9cdbff}::-webkit-scrollbar{width:7px}::-webkit-scrollbar-thumb{background:#504566;border-radius:8px}
+body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(ellipse 23% 30% at 16% 25%,#56249618,transparent 80%),radial-gradient(ellipse 26% 32% at 87% 79%,#005bb321,transparent 82%);pointer-events:none;z-index:0}
+#app{height:100dvh;max-width:1680px;margin:0 auto;position:relative;padding:0 clamp(18px,4.2vw,70px);display:flex;flex-direction:column;z-index:1}
+.topbar{height:76px;display:flex;align-items:center;gap:28px;border-bottom:1px solid #ffffff16;flex:0 0 auto}.wordmark{font-weight:760;letter-spacing:-.075em;font-size:17px;white-space:nowrap}.wordmark span{background:linear-gradient(100deg,#ff73d3 2%,#a38bff 35%,#72bbff 67%,#8ff9e5);background-clip:text;-webkit-background-clip:text;color:transparent}.top-center{flex:1;display:flex;align-items:center;justify-content:center;gap:6px}.chapter-dot{height:4px;flex:1;max-width:62px;border-radius:20px;border:0;background:#252536;transition:.25s;position:relative;padding:0}.chapter-dot.done{background:#6260a7}.chapter-dot.current{background:linear-gradient(90deg,#ff70cb,#5b9fff,#65ffda);box-shadow:0 0 18px #855cff8c}.top-actions{display:flex;gap:10px;align-items:center}.time{font:12px var(--mono);color:#b6b4cb;letter-spacing:.07em;margin-right:6px}.ghost{color:#bcc3d9;background:#ffffff08;border:1px solid #ffffff23;border-radius:12px;padding:9px 12px;font:12px var(--font);transition:.2s}.ghost:hover{color:white;background:#ffffff16;border-color:#b69bff6f;transform:translateY(-1px)}
+.deck{flex:1;position:relative;min-height:0}.slide{height:100%;width:100%;display:none;position:relative;animation:enter .45s cubic-bezier(.22,.7,.18,1)}.slide.active{display:flex;align-items:center}.layout{display:grid;grid-template-columns:minmax(320px,.79fr) minmax(480px,1.21fr);gap:clamp(20px,3.6vw,60px);width:100%;max-height:100%;align-items:center}.copy{z-index:2;min-width:0}.eyebrow{color:#9b8faa;font:11px var(--mono);letter-spacing:.21em;text-transform:uppercase;margin-bottom:25px}.eyebrow .beam{display:inline-block;height:7px;width:7px;border-radius:50%;margin-right:9px;vertical-align:middle;background:#ab80ff;box-shadow:0 0 18px #bd72ff}.h1{font-size:clamp(43px,5.3vw,78px);line-height:1.09;letter-spacing:-.078em;font-weight:790;margin:0 0 26px;word-break:keep-all}.h2{font-size:clamp(38px,4.25vw,64px);line-height:1.17;letter-spacing:-.075em;font-weight:780;margin:0 0 26px;word-break:keep-all}.spectrum{background:linear-gradient(115deg,#ff77c7 0%,#c58af9 24%,#797efe 48%,#52c2fe 73%,#a2ffdb 100%);background-clip:text;-webkit-background-clip:text;color:transparent}.body{font-size:clamp(15px,1.36vw,19px);line-height:1.8;color:#b5b4cb;letter-spacing:-.025em;word-break:keep-all;margin:0 0 22px}.body strong{color:#fff;font-weight:670}.small{font-size:12px;line-height:1.65;color:#8086a0}.small b{color:#cfcee3}.formula{display:inline-block;border:1px solid #ffffff1b;background:linear-gradient(120deg,#171427de,#0d1420b0);border-radius:14px;padding:16px 19px;font:clamp(13px,1.2vw,17px)/1.55 var(--mono);color:#e9e5ff;box-shadow:0 12px 36px #0005;max-width:100%;word-break:break-word}.formula strong{color:#a8ffe9;font-weight:520}.formula sup,.formula sub{font-size:.7em}.math-tag{font:11px var(--mono);color:#8a90a8;letter-spacing:.08em;margin-bottom:8px}
+.stage{min-width:0;position:relative;border:1px solid #ffffff1b;border-radius:25px;background:linear-gradient(142deg,#101020e8 0%,#080c16ef 75%);overflow:hidden;box-shadow:0 25px 65px #0009,0 0 75px #43267c14;transition:border-color .24s,box-shadow .24s}.stage:hover{border-color:#a78bf775;box-shadow:0 26px 78px #000b,0 0 80px #654ac81e}.stage-bar{height:51px;display:flex;align-items:center;justify-content:space-between;padding:0 19px;border-bottom:1px solid #ffffff14;font:11px var(--mono);color:#9c9ab3}.stage-bar .live{color:#94f0dd;letter-spacing:.1em}.viz{height:clamp(320px,48vh,505px);position:relative;min-width:0;background:radial-gradient(ellipse 75% 85% at 52% 44%,#17204855,transparent 72%),#070b15}.viz canvas{display:block;height:100%;width:100%;touch-action:none;cursor:crosshair}.stage-meta{position:absolute;top:20px;left:22px;color:#a8b2d3b8;font:11px var(--mono);pointer-events:none;letter-spacing:.04em}.glass-label{position:absolute;right:23px;bottom:20px;padding:8px 12px;border-radius:11px;background:#101a30bb;border:1px solid #ffffff16;backdrop-filter:blur(8px);font:12px var(--mono);color:#d4dcfc;pointer-events:none}.glass-label b{color:#79fbea;font-weight:500}
+.controls{display:flex;align-items:center;gap:12px;padding:17px 20px 20px;border-top:1px solid #ffffff13;background:#080b15}.controls label{color:#b7bdd5;font:11px var(--mono);letter-spacing:.06em;white-space:nowrap}.slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;background:linear-gradient(90deg,#8b47ff,#448dff,#43f0dc);border-radius:100px;cursor:pointer;min-width:50px}.slider::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#f7f7ff;border:3px solid #7f72ff;box-shadow:0 0 16px #866aff80}.slider::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#f7f7ff;border:3px solid #7f72ff;box-shadow:0 0 16px #866aff80}.readout{min-width:55px;text-align:right;font:14px var(--mono);color:#d6f9ff}.ui-btn{background:#191a30;color:#e9eaff;border:1px solid #5e527775;padding:10px 15px;border-radius:11px;font-size:12px;font-weight:670;white-space:nowrap;transition:.18s}.ui-btn:hover,.ui-btn.on{background:#564d84;border-color:#b99cf8;box-shadow:0 0 25px #8061fe2b;transform:translateY(-1px)}.ui-btn.primary{background:linear-gradient(105deg,#6d4bd9,#4b82ef);border:1px solid #9da1ff;color:white}.control-hint{margin-left:auto;color:#737e97;font:11px var(--mono);white-space:nowrap}.microline{display:flex;align-items:center;gap:11px;margin-top:23px;font:11px var(--mono);letter-spacing:.04em;color:#767d9b}.microline:before{content:"";width:20px;height:1px;background:#a386f7}.footer{height:65px;border-top:1px solid #ffffff14;display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;gap:15px}.chapter{font:11px var(--mono);color:#8990aa;letter-spacing:.09em}.footer-right{display:flex;gap:10px;align-items:center}.stepcount{font:12px var(--mono);color:#a7afc9;min-width:50px;text-align:center}.nav{border:1px solid #ffffff28;background:#151526;color:#e0def5;border-radius:10px;width:38px;height:35px;font-size:17px;transition:.2s}.nav:hover{background:#4c4177;border-color:#b5a2ff}.nav:disabled{opacity:.3;cursor:default}.nav:disabled:hover{background:#151526;border-color:#ffffff28}
+/* Opening: floating light ribbons made with code, not an image. */
+.hero{display:grid;grid-template-columns:1.02fr .98fr;width:100%;align-items:center;gap:20px;min-height:0}.hero h1{font-size:clamp(65px,7.4vw,113px);line-height:1.01;letter-spacing:-.09em;font-weight:810;margin:0 0 24px}.hero .body{font-size:18px;max-width:550px}.hero .ribbon-wrap{width:100%;height:min(63vh,620px);min-height:390px;position:relative}.ribbon-wrap canvas{height:100%;width:100%;display:block}.hero-number{font:12px var(--mono);color:#aeb2c9;letter-spacing:.18em;margin-bottom:25px}.hero-bottom{font:12px var(--mono);color:#9297b3;letter-spacing:.09em;margin-top:30px}.hero-bottom span{color:#c6f5fb}.hero .ghost{margin-top:5px;font-size:13px;padding:13px 17px}
+/* calculus lab */
+.calculus .layout{grid-template-columns:minmax(315px,.75fr) minmax(520px,1.25fr)}.calc-stage .viz{height:clamp(255px,36vh,370px)}.calc-deriv{height:110px;border-top:1px solid #ffffff13;position:relative;background:#090e1b}.calc-deriv canvas{width:100%;height:100%;display:block}.derivative-label{position:absolute;right:18px;top:9px;color:#b7c2e6;font:10px var(--mono);pointer-events:none}.calc-legend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:11px 14px;border-top:1px solid #ffffff13}.stat{border:1px solid #ffffff0b;background:#ffffff06;border-radius:11px;padding:8px 10px;font:10px var(--mono);color:#a6b1c8}.stat strong{display:block;color:#ecf5ff;font:17px var(--mono);margin-top:4px}.calc-stage .controls{padding:12px 15px 15px}.calc-copy .formula{display:block;font-size:clamp(11px,1.02vw,15px);white-space:normal}.formula-top{display:block;color:#8282a4;font-size:10px;margin-bottom:7px}.calc-copy .math-tag{margin-top:25px}.formula + .formula{margin-top:9px}
+/* easing lab */
+.ease-stage .viz{height:clamp(250px,37vh,383px)}.easing-options{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0 0}.preset{padding:9px 12px;background:#151627;border:1px solid #ffffff28;color:#cbd1e8;border-radius:100px;font:11px var(--mono);transition:.2s}.preset:hover,.preset.selected{color:#f0eaff;background:#4a3a75;border-color:#b09aff}.code-snippet{padding:19px 20px;border:1px solid #ffffff1b;background:linear-gradient(120deg,#111027,#07111c);border-radius:16px;box-shadow:0 15px 40px #0005;font:clamp(12px,1.05vw,15px)/1.9 var(--mono);margin-top:17px;overflow-wrap:anywhere}.code-snippet .pink{color:#ff8cde}.code-snippet .mint{color:#9bf7de}.code-snippet .muted{color:#7e83aa}.race{padding:15px 21px 17px;border-top:1px solid #ffffff14;background:#0a0a16;display:grid;gap:16px}.race-row{display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:center}.race-title{font:10px var(--mono);color:#9da4bd;letter-spacing:.05em}.race-track{height:20px;border-radius:100px;background:linear-gradient(90deg,#24233c,#1a2635);position:relative;margin-right:8px;border:1px solid #ffffff11}.race-dot{position:absolute;left:4px;top:50%;width:15px;height:15px;margin-top:-7.5px;border-radius:50%;background:#a8fff1;box-shadow:0 0 15px #81ffdb,0 0 33px #72f1e58a;transform:translateX(0)}.race-dot.linear{background:#c3b8fc;box-shadow:0 0 15px #bb91ff,0 0 33px #906cff70}.race-track:after{content:"";width:1px;height:27px;position:absolute;right:14px;top:-4px;background:#fff5}.ease-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 20px 16px;border-top:1px solid #ffffff16}.ease-bottom .small{margin:0}.ease-bottom .ui-btn{min-width:120px}
+/* conclusion */
+.ending{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:1140px;margin:auto;width:100%;padding-bottom:22px}.ending h2{font-size:clamp(51px,6.7vw,94px);font-weight:795;letter-spacing:-.09em;line-height:1.12;max-width:1130px;margin:0 0 38px;word-break:keep-all}.ending-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%}.ending-card{border-top:1px solid #ffffff47;padding:24px 18px 24px 0;transition:.22s}.ending-card:hover{border-top-color:#bca1ff;transform:translateY(-4px)}.ending-card .num{font:11px var(--mono);color:#c793fc;letter-spacing:.14em}.ending-card h3{font-size:19px;letter-spacing:-.05em;margin:17px 0 9px}.ending-card p{font-size:14px;line-height:1.72;color:#aeb0c6;margin:0;word-break:keep-all}.source{margin-top:30px;font:11px var(--mono);color:#777f98}.source a{color:#a9befc;text-decoration:none;border-bottom:1px solid #7c80a6}.source a:hover{color:white}.ending-glow{position:absolute;width:450px;height:450px;right:3%;top:9%;border-radius:50%;background:radial-gradient(circle,#8d25b62e,#4233bf0d 50%,transparent 73%);filter:blur(35px);pointer-events:none}
+/* notes modal */
+.notes{position:fixed;z-index:20;bottom:82px;left:50%;width:min(850px,calc(100vw - 32px));padding:23px 26px 22px;border:1px solid #a08af67a;border-radius:18px;background:#0e0e1df2;backdrop-filter:blur(24px);box-shadow:0 24px 85px #000d,0 0 90px #7b40d22b;transform:translateX(-50%);display:none}.notes.open{display:block}.notes-head{font:11px var(--mono);color:#ada1e8;letter-spacing:.1em;margin-bottom:12px}.notes-text{font-size:15px;color:#e1e2f2;line-height:1.8;white-space:pre-line}.notes-foot{margin-top:11px;color:#8889ae;font:11px var(--mono)}
+@keyframes enter{from{opacity:0;transform:translateY(14px);filter:blur(3px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@media(max-width:1100px){.topbar{height:62px}.layout,.calculus .layout{grid-template-columns:minmax(250px,.8fr) minmax(400px,1.2fr);gap:22px}.h2{font-size:clamp(34px,4.1vw,54px)}.body{font-size:15px}.hero h1{font-size:clamp(57px,8vw,90px)}.formula{padding:12px 14px}.viz{height:clamp(300px,47vh,440px)}.control-hint{display:none}}
+@media(max-width:780px){html,body{overflow:auto}#app{min-height:100dvh;height:auto;padding:0 16px}.topbar{height:58px;gap:12px}.wordmark{font-size:14px}.top-center{gap:3px}.chapter-dot{max-width:24px}.top-actions{gap:4px}.top-actions .ghost{font-size:10px;padding:7px 8px}.time{display:none}.deck{min-height:0}.slide{height:auto;min-height:calc(100dvh - 120px);padding:27px 0 14px}.slide.active{display:flex}.layout,.calculus .layout,.hero{display:flex;flex-direction:column;align-items:stretch;gap:20px;max-height:none}.copy{width:100%}.eyebrow{font-size:10px;margin-bottom:12px}.h1,.h2{font-size:clamp(36px,9.5vw,58px);margin-bottom:12px}.body{font-size:14px;line-height:1.65;margin-bottom:12px}.stage{border-radius:18px}.viz,.calc-stage .viz,.ease-stage .viz{height:clamp(285px,39vh,420px)}.stage-bar{height:40px;padding:0 12px;font-size:10px}.controls{padding:12px 13px 14px}.controls label{font-size:10px}.control-hint,.small{font-size:10px}.formula{font-size:12px}.hero h1{font-size:clamp(60px,15vw,86px)}.hero .ribbon-wrap{height:40vh;min-height:260px}.hero .body{font-size:15px}.hero-number{margin-bottom:14px}.hero-bottom{margin-top:12px}.footer{height:60px}.ending{padding:40px 0}.ending h2{font-size:clamp(42px,10.5vw,70px);margin-bottom:15px}.ending-grid{grid-template-columns:1fr;gap:2px}.ending-card{padding:12px 5px}.ending-card h3{margin:7px 0}.ending-card p{font-size:13px}.calc-deriv{height:84px}.calc-legend{padding:8px;gap:4px}.stat{font-size:9px;padding:6px}.stat strong{font-size:14px}.race{padding:12px}.code-snippet{font-size:12px}.notes{bottom:20px}.notes-text{font-size:13px}.microline{margin-top:11px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Codingapple-like live construction, reinterpreted in the presentation's prismatic style. */
+.cubic-stage{isolation:isolate}
+.cubic-stage .viz{height:clamp(310px,45vh,475px)}
+.cubic-stage .controls{padding:12px 16px 13px;gap:10px}
+.cubic-stage .controls .ui-btn{padding:9px 11px;font-size:11px}
+.cubic-toolbox{background:linear-gradient(170deg,#0e1022,#080b16);border-top:1px solid #ffffff17;padding:10px 16px 13px}
+.cubic-panel-title{display:flex;justify-content:space-between;color:#7c839f;font:10px var(--mono);letter-spacing:.09em;margin-bottom:8px}
+.cubic-panel-title span:last-child{color:#76dcf3}
+.layer-list{display:flex;flex-wrap:wrap;gap:6px 8px}
+.layer-list label{font:11px var(--font);white-space:nowrap;color:#c7c6e2;cursor:pointer;padding:6px 9px;border-radius:8px;background:#ffffff08;border:1px solid #ffffff14;display:flex;gap:6px;align-items:center;transition:.2s}
+.layer-list label:hover{background:#53407954;border-color:#b69aff8a;transform:translateY(-1px)}
+.layer-list label:has(input:checked){background:#41365e5c;border-color:#8671c470;color:#f3edff}
+.layer-list label input{accent-color:#b28aff;width:13px;height:13px;margin:0;cursor:pointer}
+.layer-list .dot{display:inline-block;width:7px;height:7px;border-radius:50%}
+.layer-list .one{background:#ff9ccc;box-shadow:0 0 8px #ff9ccc8c}.layer-list .two{background:#80deff;box-shadow:0 0 8px #80deff8c}.layer-list .three{background:#a8ffe6;box-shadow:0 0 8px #a8ffe68c}
+.cubic-tweak-row{margin-top:9px;display:flex;align-items:center;gap:11px;border-top:1px solid #ffffff15;padding-top:10px}
+.cubic-tweak-row .slider{max-width:170px}
+.speed-label{color:#8e91b5;font:10px var(--mono);white-space:nowrap;min-width:95px}
+.speed-label b{color:#adffe8;font-weight:500}
+.mini-pill{font:10px var(--mono);padding:7px 10px;border:1px solid #ffffff2b;background:#12152a;color:#d0ccf1;border-radius:8px;cursor:pointer;white-space:nowrap}
+.mini-pill:hover{background:#4b3c75;color:white}
+body.cubic-focus .cubic-stage{background:#0b0e1d;position:fixed;inset:18px;width:calc(100vw - 36px);height:calc(100dvh - 36px);z-index:50;display:flex;flex-direction:column;border-radius:22px;box-shadow:0 0 0 300vmax #010106d9,0 30px 120px #000e}
+body.cubic-focus .cubic-stage .viz{height:auto;flex:1;min-height:100px}
+body.cubic-focus .cubic-stage .stage-bar,body.cubic-focus .cubic-stage .controls,body.cubic-focus .cubic-stage .cubic-toolbox{flex:0 0 auto}
+body.cubic-focus .cubic-stage .stage-bar{height:45px}
+body.cubic-focus .cubic-stage .cubic-toolbox{padding-top:11px;padding-bottom:12px}
+body.cubic-focus .cubic-stage #cubicFocus{background:#794ec9;color:#fff}
+/* EDIT: edit every slide's presentation copy; save to browser or export a standalone edited HTML. */
+.top-actions .save-html{display:none}
+body.edit-mode .top-actions .save-html{display:inline-block}
+body.edit-mode #editBtn{background:linear-gradient(115deg,#8d3ed5,#3b78d5);border-color:#b4b3fa;color:white}
+[data-edit-id]{transition:outline-color .16s,background-color .16s}
+body.edit-mode [data-edit-id]{cursor:text!important;outline:1px dashed #c69cff68;outline-offset:4px;border-radius:5px}
+body.edit-mode [data-edit-id]:hover{background:#5d3d9d27;outline-color:#86d2ff}
+body.edit-mode [data-edit-id]:focus{outline:2px solid #80e9ff;outline-offset:5px;background:#8d54d01a}
+.edit-toast{position:fixed;z-index:55;bottom:82px;left:50%;transform:translateX(-50%);padding:12px 17px;background:#16102df0;border:1px solid #b18eff82;border-radius:100px;box-shadow:0 15px 40px #000a;color:#ded9ff;font:12px var(--font);text-align:center;pointer-events:none;display:none;white-space:nowrap}
+body.edit-mode .edit-toast{display:block}
+.notes-edit{width:100%;min-height:120px;max-height:33vh;resize:vertical;background:#090e1bf2;border:1px solid #a28ef750;border-radius:10px;padding:13px;color:#eeeafc;font:14px/1.7 var(--font);display:none}
+body.edit-mode .notes-text{display:none}
+body.edit-mode .notes-edit{display:block}
+@media(max-width:980px){.cubic-toolbox{padding:9px 11px}.cubic-stage .controls{gap:7px}.cubic-stage .controls .ui-btn{padding:8px;font-size:10px}.layer-list{gap:4px}.layer-list label{font-size:10px;padding:5px 7px}.cubic-tweak-row{flex-wrap:wrap}.topbar{gap:12px}.top-actions .ghost{padding:8px 9px}}
+@media(max-width:780px){body.edit-mode .top-actions .save-html{position:fixed;top:63px;right:16px;z-index:56;background:#21173c;box-shadow:0 9px 24px #000a}body.edit-mode .top-actions #resetCopyBtn{top:102px}.top-actions #exportBtn,.top-actions #resetCopyBtn{font-size:9px;padding:7px 9px}.cubic-stage .viz{height:clamp(300px,42vh,410px)}.cubic-stage .controls{flex-wrap:wrap}.cubic-stage .controls .slider{min-width:80px;flex:1}.cubic-tweak-row .slider{flex:1}.cubic-focus .cubic-stage{inset:8px!important;width:calc(100vw - 16px)!important;height:calc(100dvh - 16px)!important}.cubic-focus .cubic-stage .viz{height:auto!important;flex:1}.cubic-focus .cubic-stage .cubic-toolbox{max-height:42vh;overflow:auto}.edit-toast{bottom:64px;font-size:10px;width:calc(100vw - 24px);white-space:normal}}
+
+</style>
+</head>
+<body>
+<div id="app">
+<header class="topbar">
+  <div class="wordmark">CURVE<span>.STUDIO</span></div>
+  <nav class="top-center" aria-label="발표 슬라이드 이동" id="progress"></nav>
+  <div class="top-actions"><span class="time" id="time">03:00</span><button class="ghost" id="editBtn" title="모든 슬라이드의 문구 편집 (E)" aria-pressed="false">✎ EDIT</button><button class="ghost save-html" id="exportBtn" title="수정된 문구를 포함한 HTML 파일 저장">↓ SAVE HTML</button><button class="ghost save-html" id="resetCopyBtn" title="문구를 원래대로 되돌리기">↺ RESET TEXT</button><button class="ghost" id="notesBtn" title="발표자 노트 (N)">NOTES</button><button class="ghost" id="fullBtn" title="전체 화면 (F)">↗ FULL</button></div>
+</header>
+<main class="deck" id="deck">
+<!-- 01 -->
+<section class="slide active" data-seconds="14" data-chapter="INTRO" data-note="우리가 사용하는 앱의 아이콘이나 애니메이션에는 부드러운 곡선이 많습니다. 그런데 컴퓨터는 어떻게 이런 곡선을 그릴까요? 오늘은 단 몇 개의 점으로 곡선을 만드는 베지어 곡선을 살펴보고, 그 안에서 미적분 I의 원리를 찾아보겠습니다.">
+ <div class="hero">
+  <div class="copy">
+   <div class="hero-number">2022 REVISED CALCULUS I / 03:00</div>
+   <h1>THE ART<br>OF A<br><span class="spectrum">CURVE.</span></h1>
+   <p class="body">점 네 개로 만든 곡선 속에<br><strong>미분과 디자인의 수학</strong>이 숨어 있다.</p>
+   <button class="ghost" id="heroStart">BEGIN EXPLORATION &nbsp; →</button>
+   <div class="hero-bottom">BÉZIER CURVES &nbsp; <span>×</span> &nbsp; WEB ANIMATION</div>
+  </div>
+  <div class="ribbon-wrap"><canvas id="heroCanvas" aria-label="무지갯빛으로 빛나는 추상 베지어 곡선 애니메이션"></canvas></div>
+ </div>
+</section>
+<!-- 02 -->
+<section class="slide" data-seconds="22" data-chapter="INTERPOLATION" data-note="코딩애플의 글은 두 점 사이에 점 하나를 움직이는 것부터 시작합니다. 왼쪽 점에 1-t, 오른쪽 점에 t를 곱해 더하면 위치가 정해집니다. t가 0일 때는 왼쪽, 1일 때는 오른쪽입니다. 직접 슬라이더를 움직여 보겠습니다.">
+ <div class="layout">
+  <div class="copy"><div class="eyebrow"><span class="beam"></span>01 / INTERPOLATION</div><h2 class="h2">두 점 사이의<br><span class="spectrum">어떤 한 점.</span></h2><p class="body">두 점을 섞는 비율 <strong>t</strong>만 바꾸면, 새로운 점이 직선 위를 움직인다. 이것이 베지어 곡선의 출발점이다.</p><div class="math-tag">LINEAR INTERPOLATION</div><div class="formula">L(t) = <strong>(1 − t)</strong>P₀ + <strong>t</strong>P₁</div><div class="microline">t = 0 → 시작점 &nbsp; / &nbsp; t = 1 → 끝점</div></div>
+  <div class="stage"><div class="stage-bar"><span>01 / LERP PLAYGROUND</span><span class="live">● INTERACTIVE</span></div><div class="viz"><div class="stage-meta">DRAG THE ENDPOINTS</div><canvas id="lineCanvas" aria-label="두 점 사이 선형 보간을 탐색하는 그래프"></canvas><div class="glass-label">t = <b id="lineLive">0.35</b></div></div><div class="controls"><label for="lineSlider">PROGRESS</label><input type="range" class="slider" id="lineSlider" min="0" max="1" step="0.005" value="0.35"><output class="readout" id="lineValue">0.35</output><button class="ui-btn" id="linePlay">▶ PLAY</button></div></div>
+ </div>
+</section>
+<!-- 03 -->
+<section class="slide" data-seconds="30" data-chapter="QUADRATIC" data-note="이번에는 제어점 세 개를 사용합니다. 먼저 이웃한 점 사이에서 두 개의 점을 찾고, 다시 그 두 점 사이에서 새로운 점을 구합니다. t를 계속 바꾸면 마지막 점이 지나간 자리에 하나의 곡선이 나타납니다. 이 방법을 반복 선형 보간, 또는 드 카스텔조 알고리즘이라고 합니다.">
+ <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>02 / DE CASTELJAU</div><h2 class="h2">직선을 두 번<br>섞으면 <span class="spectrum">곡선.</span></h2><p class="body">세 개의 제어점으로 <strong>선형 보간을 두 번</strong> 반복하면, 마지막 점이 2차 베지어 곡선을 따라 움직인다.</p><div class="formula">B₂(t) = (1−t)²P₀ + 2(1−t)tP₁ + t²P₂</div><div class="microline">제어점을 직접 움직여 보자</div></div>
+ <div class="stage"><div class="stage-bar"><span>02 / QUADRATIC CONSTRUCTION</span><span class="live">● LIVE GEOMETRY</span></div><div class="viz"><div class="stage-meta">THREE POINTS · TWO LERP STEPS</div><canvas id="quadCanvas" aria-label="세 제어점으로 이차 베지어 곡선을 만드는 애니메이션"></canvas><div class="glass-label">B₂(<b id="quadLive">0.36</b>)</div></div><div class="controls"><label for="quadSlider">t VALUE</label><input type="range" class="slider" id="quadSlider" min="0" max="1" step="0.005" value="0.36"><output class="readout" id="quadValue">0.36</output><button class="ui-btn" id="quadPlay">▶ PLAY</button></div></div></div>
+</section>
+<!-- 04 -->
+<section class="slide" data-seconds="32" data-chapter="CUBIC BÉZIER" data-note="제어점을 하나 더 추가하면 3차 베지어 곡선이 됩니다. 네 점에서 출발해 보간을 세 단계 반복하면 한 점이 얻어집니다. 그 점의 경로가 3차 곡선입니다. 제어점을 드래그하면 원래 공식은 그대로인데 곡선의 모양이 즉시 바뀝니다. 이 점이 디자인에서 베지어 곡선이 유용한 이유입니다.">
+ <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>03 / FOUR CONTROL POINTS</div><h2 class="h2">점 하나만 더.<br><span class="spectrum">표현력은 더 크게.</span></h2><p class="body">네 점을 연결해 보간을 <strong>세 번</strong> 반복하면 3차 베지어 곡선이 된다. 손잡이처럼 제어점을 움직여 모양을 설계할 수 있다.</p><div class="formula" style="font-size:clamp(11px,1vw,15px)">B₃(t) = (1−t)³P₀ + 3(1−t)²tP₁<br>　　　+ 3(1−t)t²P₂ + t³P₃</div><div class="microline">DRAG & DESIGN / 0 ≤ t ≤ 1</div></div>
+ <div class="stage cubic-stage" id="cubicStage"><div class="stage-bar"><span>03 / CUBIC ENGINE</span><span class="live">● REAL-TIME RENDER</span></div><div class="viz"><div class="stage-meta">DRAG P₀–P₃ · A/B/C → D/E → Q(t)</div><canvas id="cubicCanvas" aria-label="네 제어점을 이동할 수 있는 삼차 베지어 곡선 그래프"></canvas><div class="glass-label"><b id="cubicLive">0.43</b> &nbsp; / &nbsp; CURVE</div></div><div class="controls"><label for="cubicSlider">t VALUE</label><input type="range" class="slider" id="cubicSlider" min="0" max="1" step="0.005" value="0.43"><output class="readout" id="cubicValue">0.43</output><button class="ui-btn" id="cubicPlay">▶ PLAY</button><button class="ui-btn" id="cubicReset" title="점 위치 리셋">↻ RESET</button><button class="ui-btn primary" id="cubicFocus" title="그래프를 화면 크게 보기 (Z)">⛶ EXPAND</button></div>
+ <div class="cubic-toolbox">
+  <div class="cubic-panel-title"><span>// DE CASTELJAU / LAYERS</span><span id="cubicStepText">3단계 보간 · Q(t)</span></div>
+  <div class="layer-list" id="cubicLayers">
+    <label><input type="checkbox" data-layer="curve" checked><span>곡선</span></label>
+    <label><input type="checkbox" data-layer="control" checked><span>제어 다각형</span></label>
+    <label><input type="checkbox" data-layer="first" checked><span><i class="dot one"></i> 1단계 A/B/C</span></label>
+    <label><input type="checkbox" data-layer="second" checked><span><i class="dot two"></i> 2단계 D/E</span></label>
+    <label><input type="checkbox" data-layer="final" checked><span><i class="dot three"></i> Q(t)와 이동 경로</span></label>
+    <label><input type="checkbox" data-layer="tangent"><span>접선</span></label>
+    <label><input type="checkbox" data-layer="grid" checked><span>격자</span></label>
+    <label><input type="checkbox" data-layer="labels" checked><span>라벨</span></label>
+  </div>
+  <div class="cubic-tweak-row"><div class="speed-label">SPEED <b id="cubicSpeedOut">1.0×</b></div><input class="slider" type="range" id="cubicSpeed" min="0.25" max="2.5" step="0.25" value="1"><button class="mini-pill" id="cubicRandom">✦ RANDOMIZE</button><button class="mini-pill" id="cubicShowAll">SHOW ALL</button></div>
+ </div></div></div>
+</section>
+<!-- 05 -->
+<section class="slide calculus" data-seconds="39" data-chapter="CALCULUS I" data-note="이제 미적분 I과 연결하겠습니다. 제어점의 가로 간격을 일정하게 두면 x좌표가 t가 되어 곡선의 세로 좌표는 t에 관한 삼차다항함수로 표현됩니다. 따라서 미적분 I에서 배운 다항함수 미분을 그대로 적용할 수 있습니다. 도함수는 각 위치에서 접선의 기울기를 알려줍니다. 제어점을 위아래로 옮겨 기울기 그래프가 변하는 모습을 확인해 보겠습니다.">
+ <div class="layout"><div class="copy calc-copy"><div class="eyebrow"><span class="beam"></span>04 / CALCULUS I</div><h2 class="h2">곡선을 움직이는<br><span class="spectrum">미분.</span></h2><p class="body">제어점의 <strong>x좌표를 0, ⅓, ⅔, 1</strong>로 고정하면 x = t. 따라서 y는 t에 관한 <strong>3차 다항함수</strong>가 된다.</p><div class="formula"><span class="formula-top">CUBIC POLYNOMIAL</span>y = at³ + bt² + ct + d</div><div class="formula"><span class="formula-top">DERIVATIVE · 접선 기울기</span><strong>y′ = 3at² + 2bt + c</strong></div><div class="microline">제어점은 위아래로 · t는 좌우로</div></div>
+ <div class="stage calc-stage"><div class="stage-bar"><span>04 / DERIVATIVE LAB · x = t</span><span class="live">● CALCULUS MODE</span></div><div class="viz"><div class="stage-meta">DRAG CONTROL POINTS ↑ ↓</div><canvas id="calcCanvas" aria-label="세로로 움직이는 제어점과 접선의 기울기 시각화"></canvas><div class="glass-label">TANGENT <b id="calcLive">ON</b></div></div><div class="calc-deriv"><canvas id="derivCanvas" aria-label="3차함수의 도함수인 2차함수 그래프"></canvas><div class="derivative-label">y′(t) / SLOPE</div></div><div class="calc-legend"><div class="stat">PARAMETER<strong id="statT">0.55</strong></div><div class="stat">FUNCTION y<strong id="statY">0.00</strong></div><div class="stat">SLOPE y′<strong id="statD">0.00</strong></div></div><div class="controls"><label for="calcSlider">TANGENT t</label><input type="range" class="slider" id="calcSlider" min="0" max="1" step="0.005" value="0.55"><output class="readout" id="calcValue">0.55</output></div></div></div>
+</section>
+<!-- 06 -->
+<section class="slide" data-seconds="28" data-chapter="CSS ANIMATION" data-note="베지어 곡선은 웹사이트 애니메이션에도 쓰입니다. CSS의 cubic-bezier 함수에는 두 제어점의 좌표를 입력합니다. 그래프의 가로축은 진행 시간, 세로축은 애니메이션의 진행 비율입니다. 시작과 끝에서 얼마나 빠르게 움직이는지를 바꿀 수 있습니다. 위쪽은 일정한 속도, 아래쪽은 베지어 곡선을 이용한 움직임입니다. 버튼을 눌러 비교해 보겠습니다.">
+ <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>05 / CODE MEETS DESIGN</div><h2 class="h2">CSS도 이 곡선을<br><span class="spectrum">사용한다.</span></h2><p class="body">곡선 위 점이 움직이는 법으로 <strong>애니메이션 속도</strong>를 설계한다. 가로축은 시간, 세로축은 이동 진행률이다.</p><div class="code-snippet"><span class="muted">/* CSS */</span><br><span class="pink">transition-timing-function:</span><br>&nbsp; <span class="mint" id="easeCode">cubic-bezier(.34, 1.56, .64, 1)</span>;</div><div class="easing-options"><button class="preset" data-preset="smooth">SMOOTH</button><button class="preset selected" data-preset="spring">OVERSHOOT</button><button class="preset" data-preset="slow">SLOW IN</button><button class="preset" data-preset="linear">LINEAR</button></div><div class="microline">곡선의 두 제어점도 드래그 가능</div></div>
+ <div class="stage ease-stage"><div class="stage-bar"><span>05 / CSS EASING LAB</span><span class="live">● BROWSER-NATIVE</span></div><div class="viz"><div class="stage-meta">DRAG HANDLES P₁ / P₂</div><canvas id="easeCanvas" aria-label="CSS cubic-bezier 타이밍 함수 그래프. 두 제어점을 드래그할 수 있음"></canvas></div><div class="race"><div class="race-row"><div class="race-title">LINEAR</div><div class="race-track" id="linearTrack"><span class="race-dot linear" id="linearDot"></span></div></div><div class="race-row"><div class="race-title">BÉZIER</div><div class="race-track" id="easeTrack"><span class="race-dot" id="easeDot"></span></div></div></div><div class="ease-bottom"><p class="small">같은 거리 · 같은 시간 · 다른 변화율</p><button class="ui-btn primary" id="easePlay">▶ RUN MOTION</button></div></div></div>
+</section>
+<!-- 07 -->
+<section class="slide" data-seconds="15" data-chapter="CONCLUSION" data-note="이번 탐구를 통해 곡선이 단지 눈으로 그리는 선이 아니라 두 점 사이의 보간을 반복한 결과라는 것을 배웠습니다. 특히 제어점을 움직이면 곡선뿐 아니라 접선의 기울기도 달라지는 모습을 보면서, 미적분 I의 도함수가 실제 화면을 설명한다는 점을 이해했습니다. 처음에는 디자인은 감각의 영역이라고만 생각했는데, 이제는 웹사이트의 곡선과 움직임 뒤에 어떤 수학이 있는지 궁금해졌습니다. 감사합니다.">
+ <div class="ending-glow"></div><div class="ending"><div class="eyebrow"><span class="beam"></span>06 / WHAT I LEARNED</div><h2>곡선을 따라가며<br><span class="spectrum">미분을 이해했다.</span></h2><div class="ending-grid"><div class="ending-card"><div class="num">01 · 새롭게 배운 점</div><h3>곡선은 ‘점 사이의 계산’이었다</h3><p>단순히 예쁜 선인 줄 알았던 곡선이, 두 점을 일정한 비율로 나누는 계산을 반복해서 만들어진다는 것을 알게 되었다.</p></div><div class="ending-card"><div class="num">02 · 미적분 I과의 연결</div><h3>도함수는 곡선의 변화를 보여준다</h3><p>3차다항함수의 도함수를 이용하니 제어점을 움직일 때 접선 기울기가 왜 달라지는지 설명할 수 있었다.</p></div><div class="ending-card"><div class="num">03 · 느낀 점</div><h3>수학은 디자인과 멀리 있지 않았다</h3><p>처음에는 곡선 디자인을 감각의 영역이라고 생각했다. 하지만 직접 모양과 기울기를 비교하며, 눈에 보이는 결과 뒤에 수학적 규칙이 있다는 점이 인상 깊었다.</p></div></div><div class="source">INSPIRED BY <a href="https://codingapple.com/blog/bezier-curve/" target="_blank" rel="noopener noreferrer">CODINGAPPLE / 베지어 곡선 직접 만져보기</a> &nbsp;·&nbsp; CSS REFERENCE <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/easing-function/cubic-bezier" target="_blank" rel="noopener noreferrer">MDN</a></div></div>
+</section>
+</main>
+<footer class="footer"><div class="chapter" id="chapter">INTRO / THE ART OF A CURVE</div><div class="footer-right"><span class="stepcount" id="stepcount">01 / 07</span><button class="nav" id="prev" aria-label="이전 슬라이드">←</button><button class="nav" id="next" aria-label="다음 슬라이드">→</button></div></footer>
+</div>
+<div class="notes" id="notes"><div class="notes-head" id="notesHead">PRESENTER NOTES</div><div class="notes-text" id="notesText"></div><textarea class="notes-edit" id="notesEdit" aria-label="현재 슬라이드 발표 대본 직접 수정"></textarea><div class="notes-foot">N : 닫기 &nbsp;·&nbsp; ← → : 슬라이드 &nbsp;·&nbsp; F : 전체 화면</div></div>
+<div class="edit-toast" id="editToast" role="status" aria-live="polite">✎ EDIT MODE · 제목·본문·수식을 클릭해 수정 · 자동 저장</div>
+<script>
+'use strict';
+// All graphics and animations are implemented with standard Canvas / CSS / JavaScript.
+const $=id=>document.getElementById(id),TAU=Math.PI*2,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
+const lerp=(p,q,t)=>({x:mix(p.x,q.x,t),y:mix(p.y,q.y,t)});
+const bez2=(P,t)=>lerp(lerp(P[0],P[1],t),lerp(P[1],P[2],t),t);
+const bez3=(P,t)=>lerp(lerp(lerp(P[0],P[1],t),lerp(P[1],P[2],t),t),lerp(lerp(P[1],P[2],t),lerp(P[2],P[3],t),t),t);
+const f2=n=>Number(n).toFixed(2);
+const slides=[...document.querySelectorAll('.slide')],progress=$('progress');let page=0,notesOn=false;
+const timeTotal=slides.reduce((s,e)=>s+Number(e.dataset.seconds),0);
+let elapsed=0,started=false,startStamp=0,elapsedBefore=0;
+slides.forEach((s,i)=>{const b=document.createElement('button');b.className='chapter-dot';b.setAttribute('aria-label',`${i+1}번 슬라이드 ${s.dataset.chapter}`);b.onclick=()=>go(i);progress.append(b)});
+function notes(){notesOn=!notesOn;$('notes').classList.toggle('open',notesOn);$('notesBtn').textContent=notesOn?'CLOSE NOTES':'NOTES';syncNotes()}
+function syncNotes(){const s=slides[page];$('notesHead').textContent=`SPEAKER SCRIPT · ${String(page+1).padStart(2,'0')} / ${slides.length} · ${s.dataset.seconds}s`;$('notesText').textContent=s.dataset.note;if($('notesEdit')&&document.activeElement!==$('notesEdit'))$('notesEdit').value=s.dataset.note}
+function go(n){n=clamp(n,0,slides.length-1);if(n!==page&&document.body.classList.contains('cubic-focus')){document.body.classList.remove('cubic-focus');$('cubicFocus').textContent='⛶ EXPAND';$('cubicFocus').setAttribute('aria-expanded','false')}if(!started&&page===0&&n>0){started=true;startStamp=performance.now();elapsedBefore=Number(slides[0].dataset.seconds)}slides[page].classList.remove('active');page=n;slides[page].classList.add('active');document.querySelectorAll('.chapter-dot').forEach((d,i)=>d.className='chapter-dot'+(i===page?' current':i<page?' done':''));$('chapter').textContent=`${slides[page].dataset.chapter} / THE ART OF A CURVE`;$('stepcount').textContent=`${String(page+1).padStart(2,'0')} / 07`;$('prev').disabled=page===0;$('next').disabled=page===slides.length-1;syncNotes();window.scrollTo(0,0)}
+$('prev').onclick=()=>go(page-1);$('next').onclick=()=>go(page+1);$('heroStart').onclick=()=>go(1);$('notesBtn').onclick=notes;
+$('fullBtn').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.()};
+window.addEventListener('keydown',e=>{if(document.activeElement?.isContentEditable||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowRight'||e.key===' '){go(page+1);e.preventDefault()}else if(e.key==='ArrowLeft'){go(page-1);e.preventDefault()}else if(e.key.toLowerCase()==='n')notes();else if(e.key.toLowerCase()==='f')$('fullBtn').click();else if(e.key.toLowerCase()==='e')$('editBtn').click();else if(e.key.toLowerCase()==='z'&&page===3)$('cubicFocus').click();else if(e.key==='Escape'&&document.body.classList.contains('cubic-focus'))$('cubicFocus').click()});
+function renderTime(ts){if(!started){$('time').textContent='03:00';return} elapsed=elapsedBefore+Math.floor((ts-startStamp)/1000);const left=Math.max(0,timeTotal-elapsed);$('time').textContent=`${String(Math.floor(left/60)).padStart(2,'0')}:${String(left%60).padStart(2,'0')}`}
+go(0);
+// High-DPI canvas utilities
+function surface(id){const canvas=$(id);if(!canvas)return null;const r=canvas.getBoundingClientRect(),w=r.width,h=r.height;if(w<20||h<20)return null;const d=Math.min(window.devicePixelRatio||1,2);if(canvas.width!==Math.round(w*d)||canvas.height!==Math.round(h*d)){canvas.width=Math.round(w*d);canvas.height=Math.round(h*d)}const g=canvas.getContext('2d');g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);return {g,w,h,canvas}}
+function frame(g,w,h,grid=true){const grad=g.createRadialGradient(w*.48,h*.46,4,w*.48,h*.50,Math.max(w,h)*.68);grad.addColorStop(0,'#141a33');grad.addColorStop(.55,'#0c1020');grad.addColorStop(1,'#070914');g.fillStyle=grad;g.fillRect(0,0,w,h);if(grid){g.strokeStyle='#ffffff0a';g.lineWidth=1;for(let x=30;x<w;x+=43){g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke()}for(let y=25;y<h;y+=43){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke()}}}
+function normalized(w,h,p){const padX=Math.min(54,w*.09),padY=Math.min(45,h*.10);return{x:padX+p.x*(w-2*padX),y:padY+p.y*(h-2*padY)}}
+function denormalized(w,h,px,py){const padX=Math.min(54,w*.09),padY=Math.min(45,h*.10);return{x:(px-padX)/(w-2*padX),y:(py-padY)/(h-2*padY)}}
+function line(g,a,b,col='#9ba6ce',width=1.4,dash=[]){g.save();g.beginPath();g.setLineDash(dash);g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.strokeStyle=col;g.lineWidth=width;g.stroke();g.restore()}
+function point(g,p,label,color='#a9ffec',r=5){g.save();g.shadowBlur=19;g.shadowColor=color;g.fillStyle=color;g.beginPath();g.arc(p.x,p.y,r+3,0,TAU);g.globalAlpha=.17;g.fill();g.globalAlpha=1;g.shadowBlur=0;g.beginPath();g.arc(p.x,p.y,r,0,TAU);g.fill();g.strokeStyle='#ffffffd0';g.lineWidth=1;g.stroke();if(label){g.font='12px ui-monospace,monospace';g.fillStyle='#e5e8ff';g.fillText(label,p.x+11,p.y-11)}g.restore()}
+function path(g,points,color='#9d85ff',width=3,glow=14){if(points.length<2)return;g.save();g.beginPath();g.moveTo(points[0].x,points[0].y);for(let i=1;i<points.length;i++)g.lineTo(points[i].x,points[i].y);g.lineCap='round';g.lineJoin='round';g.shadowColor=color;g.shadowBlur=glow;g.strokeStyle=color;g.lineWidth=width;g.stroke();g.restore()}
+function rainbow(g,points,w=4){if(points.length<2)return;const x0=points[0].x,x1=points[points.length-1].x,gradient=g.createLinearGradient(x0,0,x1===x0?x0+1:x1,0);gradient.addColorStop(0,'#ff65c9');gradient.addColorStop(.26,'#ba7fff');gradient.addColorStop(.51,'#6e83ff');gradient.addColorStop(.75,'#60d3ff');gradient.addColorStop(1,'#a9ffe4');g.save();g.beginPath();g.moveTo(points[0].x,points[0].y);for(let i=1;i<points.length;i++)g.lineTo(points[i].x,points[i].y);g.lineJoin='round';g.lineCap='round';g.shadowColor='#8b69ff';g.shadowBlur=26;g.strokeStyle=gradient;g.lineWidth=w+2;g.stroke();g.shadowBlur=0;g.strokeStyle=gradient;g.lineWidth=w;g.stroke();g.restore()}
+function poly(g,P,w,h,col='#a4a1c04d'){for(let i=0;i<P.length-1;i++)line(g,normalized(w,h,P[i]),normalized(w,h,P[i+1]),col,1.5,[5,5]);P.forEach((p,i)=>point(g,normalized(w,h,p),`P${i}`,i===0||i===P.length-1?'#b6baff':'#d19dff',4.8))}
+function pointerInside(e,c){const r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height}}
+function dragPoints(canvasId,points,transform){const canvas=$(canvasId);let index=-1;canvas.addEventListener('pointerdown',e=>{const p=pointerInside(e,canvas);let best=25;points.forEach((q,i)=>{const px=normalized(p.w,p.h,q);const dist=Math.hypot(p.x-px.x,p.y-px.y);if(dist<best){best=dist;index=i}});if(index>=0){canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';e.preventDefault()}});canvas.addEventListener('pointermove',e=>{const p=pointerInside(e,canvas);if(index>=0){const pos=denormalized(p.w,p.h,p.x,p.y);const q=transform?transform(pos,index):{x:clamp(pos.x,.015,.985),y:clamp(pos.y,.015,.985)};points[index].x=q.x;points[index].y=q.y}else{canvas.style.cursor=points.some(q=>{const pp=normalized(p.w,p.h,q);return Math.hypot(pp.x-p.x,pp.y-p.y)<20})?'grab':'crosshair'}});const stop=()=>{index=-1;canvas.style.cursor='crosshair'};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop)}
+// Hero: glossy rainbow ribbons drawn from animated cubic curves.
+function hero(ts){const s=surface('heroCanvas');if(!s)return;const{g,w,h}=s;g.clearRect(0,0,w,h);let time=ts/1000;const glow=g.createRadialGradient(w*.55,h*.50,20,w*.55,h*.50,w*.6);glow.addColorStop(0,'#19144288');glow.addColorStop(1,'#07061100');g.fillStyle=glow;g.fillRect(0,0,w,h);const palette=['#ff5be3','#a449ff','#6755ff','#33b8ff','#44f0cd','#dfff8e','#ff8ca8'];for(let k=0;k<8;k++){const sh=Math.sin(time*.34+k*.48)*h*.025;const st={x:w*(.12+k*.008),y:h*(.71-k*.017)+sh};const a={x:w*(.26+k*.016),y:h*(.10+k*.003)+sh};const b={x:w*(.70+k*.009),y:h*(.90-k*.016)+sh};const end={x:w*(.88-k*.009),y:h*(.25+k*.009)+sh};const pts=[];for(let j=0;j<=88;j++)pts.push(bez3([st,a,b,end],j/88));g.globalCompositeOperation='screen';path(g,pts,palette[k%palette.length],k===0?3.2:1.45,k===0?30:17)}g.globalCompositeOperation='source-over';const ellipse=g.createRadialGradient(w*.75,h*.24,0,w*.75,h*.24,w*.34);ellipse.addColorStop(0,'#8035ff27');ellipse.addColorStop(1,'#00000000');g.fillStyle=ellipse;g.fillRect(0,0,w,h);}
+// Line interpolation
+const lineModel={pts:[{x:.13,y:.70},{x:.86,y:.25}],t:.35,play:false};
+function drawLine(){const s=surface('lineCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h);const p=lineModel.pts.map(p=>normalized(w,h,p));line(g,p[0],p[1],'#a487fe',2.4);const v=normalized(w,h,lerp(lineModel.pts[0],lineModel.pts[1],lineModel.t));line(g,p[0],v,'#55e6fa',4);point(g,p[0],'P₀','#ff9fdb',7);point(g,p[1],'P₁','#aeb7ff',7);point(g,v,'L(t)','#70ffe0',8);g.font='12px ui-monospace,monospace';g.fillStyle='#a6b2d7';g.fillText('t = 0',p[0].x-5,p[0].y+30);g.fillText('t = 1',p[1].x-5,p[1].y+31)}
+function sliderPlay({slider,button,model,value,live}){const el=$(slider),out=$(value),status=$(live),play=$(button);el.oninput=()=>{model.t=+el.value;model.play=false;play.textContent='▶ PLAY';out.textContent=status.textContent=f2(model.t)};play.onclick=()=>{model.play=!model.play;play.textContent=model.play?'Ⅱ PAUSE':'▶ PLAY'};return dt=>{if(!model.play)return;model.t+=dt*.38;if(model.t>1)model.t=0;el.value=model.t;out.textContent=status.textContent=f2(model.t)}}
+const updateLine=sliderPlay({slider:'lineSlider',button:'linePlay',model:lineModel,value:'lineValue',live:'lineLive'});dragPoints('lineCanvas',lineModel.pts);
+// Quadratic / De Casteljau
+const quadModel={pts:[{x:.14,y:.78},{x:.47,y:.15},{x:.87,y:.73}],t:.36,play:false};
+function drawQuad(){const s=surface('quadCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h);const P=quadModel.pts,t=quadModel.t,curve=[];for(let i=0;i<=150;i++)curve.push(normalized(w,h,bez2(P,i/150)));rainbow(g,curve,4.6);poly(g,P,w,h);const a=lerp(P[0],P[1],t),b=lerp(P[1],P[2],t),q=lerp(a,b,t);line(g,normalized(w,h,a),normalized(w,h,b),'#e6b4fe',2);point(g,normalized(w,h,a),'A(t)','#ffca93',5.6);point(g,normalized(w,h,b),'B(t)','#ffca93',5.6);point(g,normalized(w,h,q),'B₂(t)','#87ffee',8);if(t>.01){const trace=[];for(let i=0;i<=Math.ceil(t*100);i++)trace.push(normalized(w,h,bez2(P,t*i/(Math.ceil(t*100)||1))));path(g,trace,'#abfff0',2.3,20)}}
+const updateQuad=sliderPlay({slider:'quadSlider',button:'quadPlay',model:quadModel,value:'quadValue',live:'quadLive'});dragPoints('quadCanvas',quadModel.pts);
+// Cubic / De Casteljau
+const cubicInitial=[{x:.10,y:.83},{x:.28,y:.06},{x:.68,y:.89},{x:.91,y:.17}];
+const cubicModel={pts:cubicInitial.map(p=>({...p})),t:.43,play:false};
+const cubicLayers={curve:true,control:true,first:true,second:true,final:true,tangent:false,grid:true,labels:true};let cubicSpeed=1;
+function drawCubic(){
+ const s=surface('cubicCanvas');if(!s)return;
+ const {g,w,h}=s,P=cubicModel.pts,t=cubicModel.t,show=cubicLayers,to=p=>normalized(w,h,p);
+ frame(g,w,h,show.grid);
+ const A=[lerp(P[0],P[1],t),lerp(P[1],P[2],t),lerp(P[2],P[3],t)];
+ const D=[lerp(A[0],A[1],t),lerp(A[1],A[2],t)],Q=lerp(D[0],D[1],t);
+ if(show.curve){const curve=[];for(let i=0;i<=200;i++)curve.push(to(bez3(P,i/200)));rainbow(g,curve,5)}
+ if(show.control){for(let i=0;i<3;i++)line(g,to(P[i]),to(P[i+1]),'#7d82b89a',1.7,[6,6]);}
+ if(show.first){
+   for(let i=0;i<2;i++)line(g,to(A[i]),to(A[i+1]),'#ffa7d8cc',2.2);
+   A.forEach((p,i)=>point(g,to(p),show.labels?['A','B','C'][i]:'','#ff9ccf',6.2));
+ }
+ if(show.second){
+   line(g,to(D[0]),to(D[1]),'#80d7ff',2.8);
+   D.forEach((p,i)=>point(g,to(p),show.labels?['D','E'][i]:'','#76dfff',6.5));
+ }
+ if(show.final){
+   if(t>.001){const trace=[];const n=Math.max(2,Math.ceil(t*175));for(let i=0;i<=n;i++)trace.push(to(bez3(P,t*i/n)));path(g,trace,'#affff0',2.8,19)}
+   point(g,to(Q),show.labels?'Q(t)':'','#affff0',9);
+ }
+ if(show.tangent){
+   const v={x:3*(1-t)**2*(P[1].x-P[0].x)+6*(1-t)*t*(P[2].x-P[1].x)+3*t*t*(P[3].x-P[2].x),y:3*(1-t)**2*(P[1].y-P[0].y)+6*(1-t)*t*(P[2].y-P[1].y)+3*t*t*(P[3].y-P[2].y)};
+   const px=to(Q),sx=Math.min(54,w*.09),sy=Math.min(45,h*.10),vx=v.x*(w-2*sx),vy=v.y*(h-2*sy),len=Math.hypot(vx,vy)||1,dist=Math.min(w,h)*.19;
+   line(g,{x:px.x-vx/len*dist,y:px.y-vy/len*dist},{x:px.x+vx/len*dist,y:px.y+vy/len*dist},'#edddff',2.3,[5,4]);
+   if(!show.final)point(g,px,show.labels?'Q(t)':'','#affff0',5);
+ }
+ // Control points are always visible/draggable, even with the polygon hidden.
+ P.forEach((p,i)=>point(g,to(p),show.labels?'P'+i:'',i===0||i===3?'#abbbff':'#d29aff',8));
+ $('cubicStepText').textContent=`t=${f2(t)} · Q(${f2(Q.x)}, ${f2(1-Q.y)})`;
+}
+const updateCubicRaw=sliderPlay({slider:'cubicSlider',button:'cubicPlay',model:cubicModel,value:'cubicValue',live:'cubicLive'});
+const updateCubic=dt=>updateCubicRaw(dt*cubicSpeed);
+dragPoints('cubicCanvas',cubicModel.pts);
+function cubicSync(){const v=f2(cubicModel.t);$('cubicSlider').value=cubicModel.t;$('cubicValue').textContent=$('cubicLive').textContent=v;}
+$('cubicReset').onclick=()=>{cubicInitial.forEach((p,i)=>Object.assign(cubicModel.pts[i],p));cubicModel.t=.43;cubicModel.play=false;$('cubicPlay').textContent='▶ PLAY';cubicSync()};
+$('cubicRandom').onclick=()=>{cubicModel.pts.forEach((p,i)=>{p.x=Math.max(.06,Math.min(.94,Math.random()*.84+.08));p.y=Math.max(.06,Math.min(.94,Math.random()*.84+.08))});cubicModel.play=false;$('cubicPlay').textContent='▶ PLAY'};
+$('cubicSpeed').oninput=e=>{cubicSpeed=+e.target.value;$('cubicSpeedOut').textContent=cubicSpeed.toFixed(2).replace(/0$/,'')+'×'};
+for(const box of document.querySelectorAll('[data-layer]'))box.addEventListener('change',()=>cubicLayers[box.dataset.layer]=box.checked);
+$('cubicShowAll').onclick=()=>{Object.keys(cubicLayers).forEach(k=>cubicLayers[k]=true);document.querySelectorAll('[data-layer]').forEach(box=>box.checked=true)};
+$('cubicFocus').onclick=()=>{
+ const expanded=document.body.classList.toggle('cubic-focus');$('cubicFocus').textContent=expanded?'✕ CLOSE':'⛶ EXPAND';
+ $('cubicFocus').setAttribute('aria-expanded',String(expanded));
+};
+// Calculus: x(t)=t precisely because control-point x coordinates are 0,1/3,2/3,1.
+const calc={y:[.22,.84,.24,.76],t:.55};
+function cY(t){const v=calc.y,u=1-t;return u*u*u*v[0]+3*u*u*t*v[1]+3*u*t*t*v[2]+t*t*t*v[3]}
+function cD(t){const v=calc.y,u=1-t;return 3*(u*u*(v[1]-v[0])+2*u*t*(v[2]-v[1])+t*t*(v[3]-v[2]))}
+function calcCoords(w,h,t,y){const l=Math.min(58,w*.12),r=w-l,top=35,bottom=h-40;return{x:mix(l,r,t),y:mix(bottom,top,y)}}
+function drawCalc(){const s=surface('calcCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h,false);const left=calcCoords(w,h,0,0).x,right=calcCoords(w,h,1,0).x,top=calcCoords(w,h,0,1).y,bottom=calcCoords(w,h,0,0).y;g.strokeStyle='#ffffff16';g.lineWidth=1;for(let i=0;i<=4;i++){const y=mix(top,bottom,i/4),x=mix(left,right,i/4);line(g,{x:left,y},{x:right,y},'#ffffff12',1);line(g,{x,y:top},{x,y:bottom},'#ffffff12',1)}const P=calc.y.map((y,i)=>calcCoords(w,h,i/3,y));for(let i=0;i<3;i++)line(g,P[i],P[i+1],'#a4a4d260',1.4,[5,5]);P.forEach((p,i)=>point(g,p,`P${i}`,'#bc9dfc',5.7));const curve=[];for(let i=0;i<=160;i++)curve.push(calcCoords(w,h,i/160,cY(i/160)));rainbow(g,curve,4.2);const T=calcCoords(w,h,calc.t,cY(calc.t));const slope=cD(calc.t);const x0=clamp(calc.t-.21,0,1),x1=clamp(calc.t+.21,0,1),y0=cY(calc.t)+slope*(x0-calc.t),y1=cY(calc.t)+slope*(x1-calc.t);line(g,calcCoords(w,h,x0,y0),calcCoords(w,h,x1,y1),'#f8c1fb',2.7);line(g,{x:T.x,y:T.y},{x:T.x,y:bottom},'#ffffff41',1,[4,5]);point(g,T,'tangent','#adffe5',7);g.font='11px ui-monospace,monospace';g.fillStyle='#9da5c2';g.fillText('x = 0',left-12,bottom+20);g.fillText('x = 1',right-20,bottom+20);$('statT').textContent=f2(calc.t);$('statY').textContent=f2(cY(calc.t));$('statD').textContent=(cD(calc.t)<0?'':' +').trim()+f2(cD(calc.t))}
+function drawDerivative(){const s=surface('derivCanvas');if(!s)return;const{g,w,h}=s;g.fillStyle='#080c19';g.fillRect(0,0,w,h);const left=Math.min(58,w*.12),right=w-left,top=13,bottom=h-12;let vals=[];for(let i=0;i<=120;i++)vals.push(cD(i/120));const max=Math.max(1,Math.max(...vals.map(Math.abs))*1.15);const project=(t,d)=>({x:mix(left,right,t),y:mix(bottom,top,(d+max)/(2*max))});line(g,project(0,0),project(1,0),'#ffffff30',1);const pts=[];for(let i=0;i<=120;i++)pts.push(project(i/120,vals[i]));path(g,pts,'#b69cff',2.5,12);const pp=project(calc.t,cD(calc.t));line(g,{x:pp.x,y:top},{x:pp.x,y:bottom},'#87f9ed6a',1,[3,3]);point(g,pp,'','#8effe3',4)}
+$('calcSlider').oninput=e=>{calc.t=+e.target.value;$('calcValue').textContent=f2(calc.t)};
+function dragCalc(){const c=$('calcCanvas');let dragging=-1;c.addEventListener('pointerdown',e=>{const m=pointerInside(e,c);let best=24;calc.y.forEach((y,i)=>{const p=calcCoords(m.w,m.h,i/3,y),dist=Math.hypot(p.x-m.x,p.y-m.y);if(dist<best){best=dist;dragging=i}});if(dragging>=0)c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{const m=pointerInside(e,c);if(dragging>=0){const top=35,bottom=m.h-40;calc.y[dragging]=clamp((bottom-m.y)/(bottom-top),.02,.98)}else{c.style.cursor=calc.y.some((y,i)=>{const p=calcCoords(m.w,m.h,i/3,y);return Math.hypot(p.x-m.x,p.y-m.y)<20})?'ns-resize':'crosshair'}});const stop=()=>dragging=-1;c.addEventListener('pointerup',stop);c.addEventListener('pointercancel',stop)}dragCalc();
+// CSS timing function: handles with x in [0,1], y unrestricted (within plotted region).
+const ease={p1:{x:.34,y:1.56},p2:{x:.64,y:1},label:'spring',running:false,start:0,duration:1800};
+const easePt=()=>[{x:0,y:0},ease.p1,ease.p2,{x:1,y:1}];
+const easingCSS=()=>`cubic-bezier(${+ease.p1.x.toFixed(2)}, ${+ease.p1.y.toFixed(2)}, ${+ease.p2.x.toFixed(2)}, ${+ease.p2.y.toFixed(2)})`;
+function easePos(w,h,p){const marginX=Math.min(67,w*.12),left=marginX,right=w-marginX,top=32,bottom=h-32;return{x:mix(left,right,p.x),y:mix(bottom,top,(p.y+.45)/2.2)}}
+function easeFromPos(w,h,x,y){const left=Math.min(67,w*.12),right=w-left,top=32,bottom=h-32;return{x:clamp((x-left)/(right-left),0,1),y:clamp(((bottom-y)/(bottom-top))*2.2-.45,-.45,1.75)}}
+function drawEase(ts){const s=surface('easeCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h,false);const to=p=>easePos(w,h,p);const P=easePt(),p0=to(P[0]),p3=to(P[3]);for(let i=0;i<=4;i++){const x=mix(p0.x,p3.x,i/4);line(g,{x,y:22},{x,y:h-23},'#ffffff13',1)}for(const y of [0,.5,1]){const a=to({x:0,y}),b=to({x:1,y});line(g,a,b,y===1?'#ffffff28':'#ffffff13',1)}line(g,to(P[0]),to(P[1]),'#a9a5e58c',1.7,[5,5]);line(g,to(P[2]),to(P[3]),'#a9a5e58c',1.7,[5,5]);const curve=[];for(let i=0;i<=160;i++)curve.push(to(bez3(P,i/160)));rainbow(g,curve,4);point(g,to(P[0]),'0','#aab6f8',5);point(g,to(P[3]),'1','#aab6f8',5);point(g,to(P[1]),'P₁','#eab1fa',7);point(g,to(P[2]),'P₂','#80e9fb',7);g.font='11px ui-monospace,monospace';g.fillStyle='#aaa4ca';g.fillText('time →',w-105,h-15);if(ease.running){const fraction=clamp((ts-ease.start)/ease.duration,0,1);let lo=0,hi=1;for(let i=0;i<30;i++){const m=(lo+hi)/2;if(bez3(P,m).x<fraction)lo=m;else hi=m}const t=(lo+hi)/2;point(g,to(bez3(P,t)),'','#caffd9',6);if(fraction>=1)ease.running=false}}
+function syncEase(){const code=easingCSS();$('easeCode').textContent=code;document.querySelectorAll('.preset').forEach(x=>x.classList.toggle('selected',x.dataset.preset===ease.label));}
+const presets={smooth:[.42,0,.58,1],spring:[.34,1.56,.64,1],slow:[.42,0,1,1],linear:[0,0,1,1]};
+document.querySelectorAll('.preset').forEach(button=>button.onclick=()=>{const v=presets[button.dataset.preset];ease.p1.x=v[0];ease.p1.y=v[1];ease.p2.x=v[2];ease.p2.y=v[3];ease.label=button.dataset.preset;syncEase();resetRace()});
+function resetRace(){ease.running=false;for(const id of ['linearDot','easeDot']){const dot=$(id);dot.style.transition='none';dot.style.transform='translateX(0px)'}$('easePlay').textContent='▶ RUN MOTION'}
+function race(){resetRace();const d1=$('linearDot'),d2=$('easeDot');void d1.offsetWidth;const distance=Math.max(0,$('easeTrack').clientWidth-35);d1.style.transition=`transform ${ease.duration}ms linear`;d2.style.transition=`transform ${ease.duration}ms ${easingCSS()}`;d1.style.transform=`translateX(${distance}px)`;d2.style.transform=`translateX(${distance}px)`;ease.running=true;ease.start=performance.now();$('easePlay').textContent='↻ REPLAY'}
+$('easePlay').onclick=race;syncEase();
+function dragEase(){const c=$('easeCanvas');let drag=-1;c.addEventListener('pointerdown',e=>{const p=pointerInside(e,c);const points=[ease.p1,ease.p2];let best=27;points.forEach((q,i)=>{const pp=easePos(p.w,p.h,q),d=Math.hypot(pp.x-p.x,pp.y-p.y);if(d<best){best=d;drag=i}});if(drag>=0){c.setPointerCapture(e.pointerId);c.style.cursor='grabbing';resetRace()}});c.addEventListener('pointermove',e=>{const p=pointerInside(e,c);if(drag>=0){const v=easeFromPos(p.w,p.h,p.x,p.y);const target=drag===0?ease.p1:ease.p2;Object.assign(target,v);ease.label='custom';syncEase()}else c.style.cursor=[ease.p1,ease.p2].some(q=>{const pp=easePos(p.w,p.h,q);return Math.hypot(pp.x-p.x,pp.y-p.y)<22})?'grab':'crosshair'});const stop=()=>drag=-1;c.addEventListener('pointerup',stop);c.addEventListener('pointercancel',stop)}dragEase();
+
+// Editable copy layer. Keep markup (gradient spans/strong) but prevent HTML on paste.
+const editSelector='.slide .copy h1,.slide .copy h2,.slide .copy .eyebrow,.slide .copy .body,.slide .copy .math-tag,.slide .copy .formula,.slide .copy .microline,.slide .hero-number,.slide .hero-bottom,.slide .ending .eyebrow,.slide .ending h2,.slide .ending-card .num,.slide .ending-card h3,.slide .ending-card p,.slide .stage-bar>span,.slide .stage-meta,.slide .race-title,.slide .ease-bottom .small';
+const editableItems=[...document.querySelectorAll(editSelector)].filter(node=>!node.closest('button')&&!node.querySelector('[id]'));
+editableItems.forEach((el,i)=>el.dataset.editId=String(i));
+const originalCopy=editableItems.map(el=>el.innerHTML);
+const originalNotes=slides.map(slide=>slide.dataset.note);
+const editStorage='curve-studio-v2:'+location.pathname;
+let editing=false;
+function readEdits(){try{const saved=JSON.parse(localStorage.getItem(editStorage)||'null');if(!saved)return;for(const [i,markup] of Object.entries(saved.items||{})){if(editableItems[i]&&typeof markup==='string')editableItems[i].innerHTML=markup}for(const [i,note]of Object.entries(saved.notes||{})){if(slides[i]&&typeof note==='string')slides[i].dataset.note=note}}catch(err){console.warn('Autosave unavailable',err)}}
+function saveEdits(){try{localStorage.setItem(editStorage,JSON.stringify({items:Object.fromEntries(editableItems.map((el,i)=>[i,el.innerHTML])),notes:Object.fromEntries(slides.map((s,i)=>[i,s.dataset.note]))}))}catch(err){console.warn('Storage full or disabled',err)}}
+function setEditMode(enable){editing=enable;document.body.classList.toggle('edit-mode',enable);$('editBtn').textContent=enable?'✓ DONE':'✎ EDIT';$('editBtn').setAttribute('aria-pressed',String(enable));editableItems.forEach(el=>{el.contentEditable=enable?'true':'false';el.spellcheck=enable});if(!enable&&document.activeElement?.isContentEditable)document.activeElement.blur();syncNotes()}
+editableItems.forEach(el=>{
+ el.addEventListener('input',saveEdits);
+ el.addEventListener('paste',event=>{if(!editing)return;event.preventDefault();document.execCommand('insertText',false,event.clipboardData.getData('text/plain'))});
+});
+$('editBtn').onclick=()=>setEditMode(!editing);
+$('notesEdit').addEventListener('input',e=>{slides[page].dataset.note=e.target.value;$('notesText').textContent=e.target.value;saveEdits()});
+$('resetCopyBtn').onclick=()=>{if(!confirm('모든 슬라이드 문구와 발표 대본을 초기 문구로 되돌릴까요?'))return;editableItems.forEach((el,i)=>el.innerHTML=originalCopy[i]);slides.forEach((slide,i)=>slide.dataset.note=originalNotes[i]);syncNotes();saveEdits()};
+$('exportBtn').onclick=()=>{
+ saveEdits();const clone=document.documentElement.cloneNode(true);
+ clone.querySelector('body')?.classList.remove('edit-mode','cubic-focus');
+ clone.querySelector('#editBtn')&&(clone.querySelector('#editBtn').textContent='✎ EDIT');
+ clone.querySelector('#cubicFocus')&&(clone.querySelector('#cubicFocus').textContent='⛶ EXPAND');
+ clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+ clone.querySelectorAll('.slide').forEach((s,i)=>s.classList.toggle('active',i===0));
+ clone.querySelector('#notes')?.classList.remove('open');
+ // Explicitly include edits in the downloaded HTML. On a different device they are the new defaults.
+ const html='<!DOCTYPE html>\n'+clone.outerHTML,blob=new Blob([html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='curve-studio-my-presentation.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+};
+readEdits();syncNotes();
+
+let last=0;const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+function tick(ts){const dt=Math.min(.06,(ts-last)/1000||.016);last=ts;renderTime(ts);if(!reduce){if(page===1)updateLine(dt);if(page===2)updateQuad(dt);if(page===3)updateCubic(dt)}if(page===0)hero(reduce?0:ts);else if(page===1)drawLine();else if(page===2)drawQuad();else if(page===3)drawCubic();else if(page===4){drawCalc();drawDerivative()}else if(page===5)drawEase(ts);requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
