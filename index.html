@@ -150,20 +150,20 @@ button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
  </div>
 </section>
 <!-- 02 -->
-<section class="slide" data-seconds="18" data-chapter="직선 보간" data-note="먼저 점을 두 번 찍어 직선을 만들겠습니다. 두 점 사이의 점은 (1-t)P0+tP1로 나타냅니다. t가 0이면 P0, 1이면 P1이고, 0.5이면 두 점의 중점입니다. 이제 이 계산을 여러 번 반복해 보겠습니다.">
+<section class="slide" data-seconds="18" data-chapter="직선 보간" data-note="클릭하면 점이 미리 정해진 위치에 하나씩 생깁니다. 먼저 두 점을 표시해 직선을 만들겠습니다. 두 점 사이의 점은 (1-t)P0+tP1로 나타냅니다. t가 0이면 P0, 1이면 P1이고, 0.5이면 두 점의 중점입니다. 이제 이 계산을 여러 번 반복해 보겠습니다.">
  <div class="layout">
-  <div class="copy"><div class="eyebrow"><span class="beam"></span>01 / INTERPOLATION</div><h2 class="h2">먼저 두 점을 찍고<br><span class="spectrum">직선을 만든다.</span></h2><p class="body">빈 그래프를 두 번 클릭해 점을 놓자. 두 점 사이의 위치는 <strong>(1−t)P₀ + tP₁</strong>로 계산한다. t=0.5이면 정확히 중점이다.</p><div class="math-tag">선형 보간</div><div class="formula">L(t) = <strong>(1 − t)</strong>P₀ + <strong>t</strong>P₁</div><div class="microline">t=0.5 → 중점 · t=0~1 → 두 점을 잇는 직선</div></div>
+  <div class="copy"><div class="eyebrow"><span class="beam"></span>01 / INTERPOLATION</div><h2 class="h2">먼저 두 점을 찍고<br><span class="spectrum">직선을 만든다.</span></h2><p class="body">그래프를 클릭하면 보기 좋은 위치에 점이 하나씩 나타난다. 완성 후 점을 드래그할 수 있다. 두 점 사이의 위치는 <strong>(1−t)P₀ + tP₁</strong>로 계산한다. t=0.5이면 정확히 중점이다.</p><div class="math-tag">선형 보간</div><div class="formula">L(t) = <strong>(1 − t)</strong>P₀ + <strong>t</strong>P₁</div><div class="microline">t=0.5 → 중점 · t=0~1 → 두 점을 잇는 직선</div></div>
   <div class="stage"><div class="stage-bar"><span>01 / 직선 만들기</span><span class="live">● INTERACTIVE</span></div><div class="viz"><div class="stage-meta" id="lineInstruction">빈 곳을 클릭해 첫 번째 점 P₀를 찍으세요.</div><canvas id="lineCanvas" aria-label="두 점 사이 선형 보간을 탐색하는 그래프"></canvas><div class="glass-label">t = <b id="lineLive">0.50</b></div></div><div class="controls"><label for="lineSlider">위치 t</label><input type="range" class="slider" id="lineSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="lineValue">0.50</output><button class="ui-btn" id="linePlay" disabled>▶ 움직이기</button><button class="ui-btn" id="lineReset">↺ 다시 시작</button></div></div>
  </div>
 </section>
 <!-- 03 -->
-<section class="slide" data-seconds="42" data-chapter="2차 베지어" data-note="빈 화면에 세 점을 찍겠습니다. 두 선분을 잇고, 각 선분의 중점 A와 B를 표시하겠습니다. 두 중점을 연결하고 그 중점 Q를 찍으면 점이 하나 정해집니다. 이때 t는 0.5입니다. 그런데 t를 계속 바꾸면 A와 B의 위치도 바뀌고, 마지막 점 Q가 지나간 자취가 2차 베지어 곡선이 됩니다.">
- <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>02 / 선형 보간 반복</div><h2 class="h2">세 점으로 만드는<br><span class="spectrum">2차 베지어 곡선</span></h2><p class="body">화면에 <strong>세 점</strong>을 직접 찍는다. t=0.5에서 두 선분의 <strong>중점 A, B</strong>를 찾고, 다시 그 둘의 <strong>중점 Q</strong>를 구한다. t를 바꾸면 Q의 이동 경로가 곡선이 된다.</p><div class="formula">Q(t) = (1−t)A(t) + tB(t)<br><strong>B₂(t) = (1−t)²P₀ + 2(1−t)tP₁ + t²P₂</strong></div><div class="microline">처음에는 중점(t=0.5) · 마지막에는 t를 변화시켜 곡선 확인</div></div>
+<section class="slide" data-seconds="42" data-chapter="2차 베지어" data-note="클릭 세 번으로 예시 제어점 세 개를 차례로 놓겠습니다. 완성 후에는 점을 직접 옮길 수 있습니다. 두 선분을 잇고, 각 선분의 중점 A와 B를 표시하겠습니다. 두 중점을 연결하고 그 중점 Q를 찍으면 점이 하나 정해집니다. 이때 t는 0.5입니다. 그런데 t를 계속 바꾸면 A와 B의 위치도 바뀌고, 마지막 점 Q가 지나간 자취가 2차 베지어 곡선이 됩니다.">
+ <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>02 / 선형 보간 반복</div><h2 class="h2">세 점으로 만드는<br><span class="spectrum">2차 베지어 곡선</span></h2><p class="body">클릭 세 번으로 <strong>제어점 세 개</strong>를 차례로 놓는다. 점의 위치는 나중에 직접 바꿀 수 있다. t=0.5에서 두 선분의 <strong>중점 A, B</strong>를 찾고, 다시 그 둘의 <strong>중점 Q</strong>를 구한다. t를 바꾸면 Q의 이동 경로가 곡선이 된다.</p><div class="formula">Q(t) = (1−t)A(t) + tB(t)<br><strong>B₂(t) = (1−t)²P₀ + 2(1−t)tP₁ + t²P₂</strong></div><div class="microline">처음에는 중점(t=0.5) · 마지막에는 t를 변화시켜 곡선 확인</div></div>
  <div class="stage"><div class="stage-bar"><span>02 / 중점으로 곡선 만들기</span><span class="live">● LIVE GEOMETRY</span></div><div class="viz"><div class="stage-meta" id="quadInstruction">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="quadCanvas" aria-label="세 제어점으로 이차 베지어 곡선을 만드는 애니메이션"></canvas><div class="glass-label">B₂(<b id="quadLive">0.50</b>)</div></div><div class="controls"><label for="quadSlider">위치 t</label><input type="range" class="slider" id="quadSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="quadValue">0.50</output><button class="ui-btn primary" id="quadNext">다음 단계 →</button><button class="ui-btn" id="quadPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn" id="quadReset">↺ 초기화</button></div></div></div>
 </section>
 <!-- 04 -->
-<section class="slide" data-seconds="36" data-chapter="3차 베지어" data-note="이번에는 네 점을 직접 놓고 같은 방법을 한 단계 더 반복하겠습니다. 각 선분에서 A, B, C를 구한 다음 이 점들을 연결합니다. 다시 중점 D와 E를 구하고 연결한 뒤, 그 중점 Q를 구합니다. t를 0에서 1까지 변화시키면 Q의 경로가 3차 베지어 곡선입니다. 이것이 네 개의 제어점으로 곡선을 만드는 방법입니다.">
- <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>03 / 선형 보간 3회 반복</div><h2 class="h2">네 점으로 만드는<br><span class="spectrum">3차 베지어 곡선</span></h2><p class="body">빈 화면에 <strong>네 점</strong>을 찍는다. 각 선분에서 점 <strong>A·B·C</strong>를 만들고, 다시 <strong>D·E</strong>, 마지막으로 <strong>Q</strong>를 구한다. t를 0~1까지 바꾸면 3차 곡선이 만들어진다.</p><div class="formula" style="font-size:clamp(11px,1vw,15px)">B₃(t) = (1−t)³P₀ + 3(1−t)²tP₁<br>　　　+ 3(1−t)t²P₂ + t³P₃</div><div class="microline">미적분 I 연결 · 3차 다항함수 → 미분하면 2차</div></div>
+<section class="slide" data-seconds="36" data-chapter="3차 베지어" data-note="이번에는 네 번 클릭해서 보기 좋은 위치에 네 점을 하나씩 놓고, 같은 방법을 한 단계 더 반복하겠습니다. 각 선분에서 A, B, C를 구한 다음 이 점들을 연결합니다. 다시 중점 D와 E를 구하고 연결한 뒤, 그 중점 Q를 구합니다. t를 0에서 1까지 변화시키면 Q의 경로가 3차 베지어 곡선입니다. 이것이 네 개의 제어점으로 곡선을 만드는 방법입니다.">
+ <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>03 / 선형 보간 3회 반복</div><h2 class="h2">네 점으로 만드는<br><span class="spectrum">3차 베지어 곡선</span></h2><p class="body">클릭 네 번으로 <strong>제어점 네 개</strong>를 놓고, 나중에 원하는 위치로 이동할 수 있다. 각 선분에서 점 <strong>A·B·C</strong>를 만들고, 다시 <strong>D·E</strong>, 마지막으로 <strong>Q</strong>를 구한다. t를 0~1까지 바꾸면 3차 곡선이 만들어진다.</p><div class="formula" style="font-size:clamp(11px,1vw,15px)">B₃(t) = (1−t)³P₀ + 3(1−t)²tP₁<br>　　　+ 3(1−t)t²P₂ + t³P₃</div><div class="microline">미적분 I 연결 · 3차 다항함수 → 미분하면 2차</div></div>
  <div class="stage cubic-stage" id="cubicStage"><div class="stage-bar"><span>03 / 네 점으로 곡선 만들기</span><div class="view-tabs" role="group" aria-label="2D 또는 3D 시각화"><button id="cubicView2D" type="button" class="view-tab on" aria-pressed="true">2D</button><button id="cubicView3D" type="button" class="view-tab" aria-pressed="false">3D SPEED</button></div></div><div class="viz"><div class="stage-meta" id="cubicHint">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="cubicCanvas" aria-label="네 제어점을 이동할 수 있는 삼차 베지어 곡선 그래프"></canvas><div class="glass-label"><b id="cubicLive">0.50</b> &nbsp; / &nbsp; CURVE</div></div><div class="controls"><label for="cubicSlider">위치 t</label><input type="range" class="slider" id="cubicSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="cubicValue">0.50</output><button class="ui-btn" id="cubicPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn primary" id="cubicStepBtn" title="다음 구성 단계 표시">다음 단계 →</button><button class="ui-btn" id="cubicReset" title="빈 화면부터 다시 시작">↺ 초기화</button><button class="ui-btn" id="cubicFocus" title="그래프를 화면 크게 보기 (Z)">⛶ 확대</button></div>
  <div class="cubic-toolbox">
   <div class="cubic-panel-title"><span>표시할 요소</span><span id="cubicStepText">점부터 직접 찍어 보세요.</span></div>
@@ -260,18 +260,18 @@ function sliderPlay({slider,button,model,value,live}){const el=$(slider),out=$(v
  return dt=>{if(!model.play)return;model.t+=dt*.34;if(model.t>1)model.t=0;el.value=model.t;out.textContent=status.textContent=f2(model.t)}}
 const updateLine=sliderPlay({slider:'lineSlider',button:'linePlay',model:lineModel,value:'lineValue',live:'lineLive'});
 function lineSync(){const ready=lineModel.pts.length===2;
- $('lineInstruction').textContent=!ready?'빈 화면을 클릭해 P'+lineModel.pts.length+'를 찍으세요.':'점을 끌어 위치를 바꾸거나 t를 움직여 보세요.';
+ $('lineInstruction').textContent=!ready?'클릭하면 정해진 위치에 P'+lineModel.pts.length+'가 나타납니다.':'점을 드래그해 위치를 바꾸거나 t를 움직여 보세요.';
  $('lineSlider').disabled=!ready;$('linePlay').disabled=!ready;
  $('lineSlider').value=lineModel.t;$('lineValue').textContent=$('lineLive').textContent=f2(lineModel.t);
 }
 $('lineReset').onclick=()=>{lineModel.pts.length=0;lineModel.t=.5;lineModel.play=false;$('linePlay').textContent='▶ 움직이기';lineSync()};
 const quadModel={pts:[],t:.5,play:false,stage:0};
 const quadStages=[
- '빈 화면을 클릭해 P₀를 찍으세요.','두 번째 점 P₁를 찍으세요.','마지막 점 P₂를 찍으세요.',
- '세 점을 찍었습니다. 화면이나 ‘다음 단계’를 누르세요.','P₀–P₁, P₁–P₂ 선분을 연결했습니다.',
+ '클릭하면 정해진 위치에 P₀가 나타납니다.','한 번 더 클릭하면 P₁가 나타납니다.','다시 클릭해 P₂를 놓으세요.',
+ '예시 제어점 세 개를 놓았습니다. 점을 옮기거나 다음 단계를 누르세요.','P₀–P₁, P₁–P₂ 선분을 연결했습니다.',
  'P₀–P₁의 중점 A를 표시했습니다.','P₁–P₂의 중점 B를 표시했습니다.',
  '두 중점 A와 B를 연결했습니다.','A–B의 중점 Q를 표시했습니다.',
- 't를 0부터 1까지 움직여 Q(t)가 그리는 곡선을 확인하세요.'
+ '완성! 제어점을 드래그해 곡선을 바꾸거나, t를 움직여 Q(t)의 이동 경로를 확인하세요.'
 ];
 function quadSync(){
  const m=quadModel,complete=m.stage>=9,all=m.pts.length===3;
@@ -299,6 +299,13 @@ function drawQuad(){const s=surface('quadCanvas');if(!s)return;const{g,w,h}=s,m=
 const updateQuad=sliderPlay({slider:'quadSlider',button:'quadPlay',model:quadModel,value:'quadValue',live:'quadLive'});
 $('quadNext').onclick=quadAdvance;
 $('quadReset').onclick=()=>{quadModel.pts.length=0;quadModel.stage=0;quadModel.t=.5;quadModel.play=false;quadSync()};
+// Clicks place the next point at a planned position so each presentation starts
+// with a readable example. After all points appear, the handles remain draggable.
+const presetConstructionPoints={
+ lineCanvas:[{x:.14,y:.74},{x:.86,y:.27}],
+ quadCanvas:[{x:.10,y:.85},{x:.50,y:.055},{x:.90,y:.85}],
+ cubicCanvas:[{x:.10,y:.84},{x:.28,y:.075},{x:.71,y:.925},{x:.91,y:.17}]
+};
 function attachPointConstruction(id,model,maxCount,advance,sync,skipWhen3D=false){
  const c=$(id);let tracking=false,dragging=-1,moved=false,startX=0,startY=0;
  c.addEventListener('pointerdown',e=>{
@@ -319,7 +326,11 @@ function attachPointConstruction(id,model,maxCount,advance,sync,skipWhen3D=false
   if(skipWhen3D&&cubicView3d)return;
   const p=pointerInside(e,c);
   if(dragging<0&&!moved){
-   if(model.pts.length<maxCount){const pos=denormalized(p.w,p.h,p.x,p.y);model.pts.push({x:clamp(pos.x,.045,.955),y:clamp(pos.y,.045,.955)});if('stage'in model)model.stage=model.pts.length}
+   if(model.pts.length<maxCount){
+    const planned=presetConstructionPoints[id][model.pts.length];
+    model.pts.push({...planned});
+    if('stage'in model)model.stage=model.pts.length;
+   }
    else if(advance)advance();
   }
   dragging=-1;c.style.cursor='crosshair';sync();
@@ -381,12 +392,12 @@ orbitCanvas.addEventListener('pointermove',e=>{if(!cubicView3d||!orbit3d.active)
 for(const type of ['pointerup','pointercancel'])orbitCanvas.addEventListener(type,()=>{orbit3d.active=false;if(cubicView3d)orbitCanvas.style.cursor='grab'});
 orbitCanvas.addEventListener('wheel',e=>{if(!cubicView3d)return;e.preventDefault();orbit3d.zoom=clamp(orbit3d.zoom*(e.deltaY>0?.93:1.07),.6,1.65)},{passive:false});
 const cubicStages=[
- '빈 화면을 클릭해 P₀를 찍으세요.','두 번째 점 P₁를 찍으세요.','세 번째 점 P₂를 찍으세요.','네 번째 점 P₃를 찍으세요.',
- '네 점이 준비됐습니다. 화면이나 다음 단계를 누르세요.','제어점 4개를 연결했습니다.',
+ '클릭하면 정해진 위치에 P₀가 나타납니다.','클릭해서 P₁을 놓으세요.','클릭해서 P₂를 놓으세요.','클릭해서 P₃를 놓으세요.',
+ '예시 제어점 네 개를 놓았습니다. 점을 옮기거나 다음 단계를 누르세요.','제어점 4개를 연결했습니다.',
  'P₀–P₁의 중점 A를 표시했습니다.','P₁–P₂의 중점 B를 표시했습니다.','P₂–P₃의 중점 C를 표시했습니다.',
  'A, B, C를 선으로 연결했습니다.','A–B의 중점 D를 표시했습니다.','B–C의 중점 E를 표시했습니다.',
  'D와 E를 연결했습니다.','D–E의 중점 Q를 표시했습니다.',
- 't를 0~1까지 움직이면 Q(t)의 경로가 3차 베지어 곡선이 됩니다.'
+ '완성! 제어점을 드래그해 곡선을 바꾸거나, t를 움직여 Q(t)의 경로를 확인하세요.'
 ];
 function cubicSync(){
  const ready=cubicModel.stage>=14,placed=cubicModel.pts.length===4;
@@ -544,7 +555,7 @@ const editableItems=[...document.querySelectorAll(editSelector)].filter(node=>!n
 editableItems.forEach((el,i)=>el.dataset.editId=String(i));
 const originalCopy=editableItems.map(el=>el.innerHTML);
 const originalNotes=slides.map(slide=>slide.dataset.note);
-const editStorage='curve-studio-v5:'+location.pathname;
+const editStorage='curve-studio-v6:'+location.pathname;
 let editing=false;
 function readEdits(){try{const saved=JSON.parse(localStorage.getItem(editStorage)||'null');if(!saved)return;for(const [i,markup] of Object.entries(saved.items||{})){if(editableItems[i]&&typeof markup==='string')editableItems[i].innerHTML=markup}for(const [i,note]of Object.entries(saved.notes||{})){if(slides[i]&&typeof note==='string')slides[i].dataset.note=note}}catch(err){console.warn('Autosave unavailable',err)}}
 function saveEdits(){try{localStorage.setItem(editStorage,JSON.stringify({items:Object.fromEntries(editableItems.map((el,i)=>[i,el.innerHTML])),notes:Object.fromEntries(slides.map((s,i)=>[i,s.dataset.note]))}))}catch(err){console.warn('Storage full or disabled',err)}}
