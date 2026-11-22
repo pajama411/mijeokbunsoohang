@@ -164,7 +164,7 @@ button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
 <!-- 04 -->
 <section class="slide" data-seconds="26" data-chapter="CUBIC BÉZIER" data-note="같은 방법에서 제어점을 하나 더 추가하면 네 점이 됩니다. 첫 번째 보간에서 세 점 A, B, C가 생기고, 다음 단계에서 D와 E, 마지막에 Q 하나가 생깁니다. Q의 움직임이 3차 베지어 곡선입니다. 수식을 펼치면 3차 다항식이 되기 때문에, 다음 장에서 미적분 I의 도함수로 곡선의 순간적인 기울기를 계산할 수 있습니다. 제어점을 한 번 움직여 보겠습니다.">
  <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>03 / 선형 보간 3회 반복</div><h2 class="h2">네 점으로 만드는<br><span class="spectrum">3차 베지어 곡선</span></h2><p class="body">빈 화면에 <strong>네 점</strong>을 찍는다. 각 선분에서 점 <strong>A·B·C</strong>를 만들고, 다시 <strong>D·E</strong>, 마지막으로 <strong>Q</strong>를 구한다. t를 0~1까지 바꾸면 3차 곡선이 만들어진다.</p><div class="formula" style="font-size:clamp(11px,1vw,15px)">B₃(t) = (1−t)³P₀ + 3(1−t)²tP₁<br>　　　+ 3(1−t)t²P₂ + t³P₃</div><div class="microline">미적분 I 연결 · 3차 다항함수 → 미분하면 2차</div></div>
- <div class="stage cubic-stage" id="cubicStage"><div class="stage-bar"><span>03 / 네 점으로 곡선 만들기</span><div class="view-tabs" role="group" aria-label="2D 또는 3D 시각화"><button id="cubicView2D" type="button" class="view-tab on" aria-pressed="true">2D</button><button id="cubicView3D" type="button" class="view-tab" aria-pressed="false">3D SPEED</button></div></div><div class="viz"><div class="stage-meta" id="cubicHint">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="cubicCanvas" aria-label="네 제어점을 이동할 수 있는 삼차 베지어 곡선 그래프"></canvas><div class="glass-label"><b id="cubicLive">0.43</b> &nbsp; / &nbsp; CURVE</div></div><div class="controls"><label for="cubicSlider">위치 t</label><input type="range" class="slider" id="cubicSlider" min="0" max="1" step="0.005" value="0.43"><output class="readout" id="cubicValue">0.43</output><button class="ui-btn" id="cubicPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn primary" id="cubicStepBtn" title="다음 구성 단계 표시">다음 단계 →</button><button class="ui-btn" id="cubicReset" title="빈 화면부터 다시 시작">↺ 초기화</button><button class="ui-btn" id="cubicFocus" title="그래프를 화면 크게 보기 (Z)">⛶ 확대</button></div>
+ <div class="stage cubic-stage" id="cubicStage"><div class="stage-bar"><span>03 / 네 점으로 곡선 만들기</span><div class="view-tabs" role="group" aria-label="2D 또는 3D 시각화"><button id="cubicView2D" type="button" class="view-tab on" aria-pressed="true">2D</button><button id="cubicView3D" type="button" class="view-tab" aria-pressed="false">3D SPEED</button></div></div><div class="viz"><div class="stage-meta" id="cubicHint">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="cubicCanvas" aria-label="네 제어점을 이동할 수 있는 삼차 베지어 곡선 그래프"></canvas><div class="glass-label"><b id="cubicLive">0.50</b> &nbsp; / &nbsp; CURVE</div></div><div class="controls"><label for="cubicSlider">위치 t</label><input type="range" class="slider" id="cubicSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="cubicValue">0.50</output><button class="ui-btn" id="cubicPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn primary" id="cubicStepBtn" title="다음 구성 단계 표시">다음 단계 →</button><button class="ui-btn" id="cubicReset" title="빈 화면부터 다시 시작">↺ 초기화</button><button class="ui-btn" id="cubicFocus" title="그래프를 화면 크게 보기 (Z)">⛶ 확대</button></div>
  <div class="cubic-toolbox">
   <div class="cubic-panel-title"><span>표시할 요소</span><span id="cubicStepText">점부터 직접 찍어 보세요.</span></div>
   <div class="layer-list" id="cubicLayers">
@@ -332,10 +332,10 @@ attachPointConstruction('quadCanvas',quadModel,3,quadAdvance,quadSync);
 $('lineSlider').value='0.5';$('quadSlider').value='0.5';lineSync();quadSync();
 // Cubic / De Casteljau
 const cubicInitial=[{x:.10,y:.83},{x:.28,y:.06},{x:.68,y:.89},{x:.91,y:.17}];
-const cubicModel={pts:cubicInitial.map(p=>({...p})),t:.43,play:false};
+const cubicModel={pts:[],t:.5,play:false,stage:0};
 const cubicLayers={curve:true,control:true,first:true,second:true,final:true,tangent:false,grid:true,labels:true};let cubicSpeed=1;
 
-let cubicView3d=false,cubicStepIndex=3;
+let cubicView3d=false;
 const orbit3d={yaw:-.61,pitch:.56,zoom:1,depth:1,active:false,x:0,y:0};
 function bezierVelocity(t){const P=cubicModel.pts,u=1-t;return{x:3*u*u*(P[1].x-P[0].x)+6*u*t*(P[2].x-P[1].x)+3*t*t*(P[3].x-P[2].x),y:3*u*u*(P[1].y-P[0].y)+6*u*t*(P[2].y-P[1].y)+3*t*t*(P[3].y-P[2].y)}}
 function bezierSpeed(t){const v=bezierVelocity(t);return Math.hypot(v.x,v.y)}
@@ -367,10 +367,11 @@ function drawCubic3D(){
  $('cubicStepText').textContent=`t=${f2(t)} · SPEED=${bezierSpeed(t).toFixed(3)} · HEIGHT ∝ |B′(t)|`;
 }
 function setCubicView(on){
+ if(on&&cubicModel.stage<14)return;
  cubicView3d=on;
  for(const [id,sel] of [['cubicView2D',!on],['cubicView3D',on]]){$(id).classList.toggle('on',sel);$(id).setAttribute('aria-pressed',String(sel))}
- $('depthControl').hidden=!on;$('cubicStepBtn').disabled=on;$('cubicCanvas').style.cursor=on?'grab':'crosshair';
- $('cubicHint').textContent=on?'3D: x,y=POSITION · z=|B′(t)| (NORMALIZED)':'DRAG P₀–P₃ · A/B/C → D/E → Q(t)';
+ $('depthControl').hidden=!on;$('cubicStepBtn').disabled=on||cubicModel.stage>=14;$('cubicCanvas').style.cursor=on?'grab':'crosshair';
+ $('cubicHint').textContent=on?'3D에서 드래그하면 회전합니다. 높이는 |B′(t)|에 비례합니다.':cubicStages[Math.min(14,cubicModel.stage)];
 }
 $('cubicView2D').onclick=()=>setCubicView(false);$('cubicView3D').onclick=()=>setCubicView(true);
 $('cubicDepth').oninput=e=>{orbit3d.depth=+e.target.value;$('cubicDepthOut').textContent=orbit3d.depth.toFixed(2)+'×'};
@@ -379,55 +380,75 @@ orbitCanvas.addEventListener('pointerdown',e=>{if(!cubicView3d)return;orbit3d.ac
 orbitCanvas.addEventListener('pointermove',e=>{if(!cubicView3d||!orbit3d.active)return;orbit3d.yaw+=(e.clientX-orbit3d.x)*.009;orbit3d.pitch=clamp(orbit3d.pitch+(e.clientY-orbit3d.y)*.007,.17,1.25);orbit3d.x=e.clientX;orbit3d.y=e.clientY});
 for(const type of ['pointerup','pointercancel'])orbitCanvas.addEventListener(type,()=>{orbit3d.active=false;if(cubicView3d)orbitCanvas.style.cursor='grab'});
 orbitCanvas.addEventListener('wheel',e=>{if(!cubicView3d)return;e.preventDefault();orbit3d.zoom=clamp(orbit3d.zoom*(e.deltaY>0?.93:1.07),.6,1.65)},{passive:false});
-$('cubicStepBtn').onclick=()=>{
- if(cubicView3d)setCubicView(false);cubicStepIndex=cubicStepIndex%3+1;
- cubicLayers.first=cubicStepIndex>=1;cubicLayers.second=cubicStepIndex>=2;cubicLayers.final=cubicStepIndex>=3;
- for(const key of ['first','second','final']){const input=document.querySelector('[data-layer="'+key+'"]');if(input)input.checked=cubicLayers[key]}
- $('cubicStepBtn').textContent='STEP '+cubicStepIndex+' / 3';
-};
-
+const cubicStages=[
+ '빈 화면을 클릭해 P₀를 찍으세요.','두 번째 점 P₁를 찍으세요.','세 번째 점 P₂를 찍으세요.','네 번째 점 P₃를 찍으세요.',
+ '네 점이 준비됐습니다. 화면이나 다음 단계를 누르세요.','제어점 4개를 연결했습니다.',
+ 'P₀–P₁의 중점 A를 표시했습니다.','P₁–P₂의 중점 B를 표시했습니다.','P₂–P₃의 중점 C를 표시했습니다.',
+ 'A, B, C를 선으로 연결했습니다.','A–B의 중점 D를 표시했습니다.','B–C의 중점 E를 표시했습니다.',
+ 'D와 E를 연결했습니다.','D–E의 중점 Q를 표시했습니다.',
+ 't를 0~1까지 움직이면 Q(t)의 경로가 3차 베지어 곡선이 됩니다.'
+];
+function cubicSync(){
+ const ready=cubicModel.stage>=14,placed=cubicModel.pts.length===4;
+ $('cubicHint').textContent=cubicView3d?'3D에서 그래프를 드래그해 회전할 수 있습니다.':cubicStages[Math.min(14,cubicModel.stage)];
+ $('cubicStepBtn').disabled=!placed||ready||cubicView3d;
+ $('cubicStepBtn').textContent=ready?'곡선 완성':'다음 단계 →';
+ $('cubicSlider').disabled=!ready;$('cubicPlay').disabled=!ready;
+ $('cubicView3D').disabled=!ready;
+ if(!ready){cubicModel.play=false;$('cubicPlay').textContent='▶ 곡선 따라가기';}
+ const v=f2(cubicModel.t);$('cubicSlider').value=cubicModel.t;$('cubicValue').textContent=$('cubicLive').textContent=v;
+ $('cubicStepText').textContent=ready?'3차 베지어 곡선 · t=0~1':'구성 단계 '+cubicModel.stage+' / 14';
+}
+function cubicAdvance(){if(cubicModel.pts.length!==4||cubicModel.stage>=14)return;cubicModel.stage++;cubicSync()}
+$('cubicStepBtn').onclick=cubicAdvance;
 function drawCubic(){
- if(cubicView3d){drawCubic3D();return}
+ if(cubicView3d&&cubicModel.stage>=14){drawCubic3D();return}
  const s=surface('cubicCanvas');if(!s)return;
- const {g,w,h}=s,P=cubicModel.pts,t=cubicModel.t,show=cubicLayers,to=p=>normalized(w,h,p);
- frame(g,w,h,show.grid);
+ const {g,w,h}=s,P=cubicModel.pts,t=cubicModel.t,k=cubicModel.stage,show=cubicLayers,to=p=>normalized(w,h,p);
+ emptyStage(g,w,h);
+ if(k>=14&&show.grid)frame(g,w,h,true);
+ if(P.length===4){
  const A=[lerp(P[0],P[1],t),lerp(P[1],P[2],t),lerp(P[2],P[3],t)];
  const D=[lerp(A[0],A[1],t),lerp(A[1],A[2],t)],Q=lerp(D[0],D[1],t);
- if(show.curve){const curve=[];for(let i=0;i<=200;i++)curve.push(to(bez3(P,i/200)));rainbow(g,curve,5)}
- if(show.control){for(let i=0;i<3;i++)line(g,to(P[i]),to(P[i+1]),'#7d82b89a',1.7,[6,6]);}
- if(show.first){
-   for(let i=0;i<2;i++)line(g,to(A[i]),to(A[i+1]),'#ffa7d8cc',2.2);
-   A.forEach((p,i)=>point(g,to(p),show.labels?['A','B','C'][i]:'','#ff9ccf',6.2));
+ if(k>=14&&show.curve){const curve=[];for(let i=0;i<=200;i++)curve.push(to(bez3(P,i/200)));rainbow(g,curve,4.9);
+  if(t>.002){const trace=[];for(let i=0;i<=100;i++)trace.push(to(bez3(P,t*i/100)));path(g,trace,'#a9ffe7',2.7,16)}}
+ if(k>=5&&show.control){for(let i=0;i<3;i++)line(g,to(P[i]),to(P[i+1]),'#8f92caa0',1.8,[6,4])}
+ if(k>=9&&show.first){line(g,to(A[0]),to(A[1]),'#ffb5ddbe',2.1);line(g,to(A[1]),to(A[2]),'#ffb5ddbe',2.1)}
+ if(k>=6&&show.first)point(g,to(A[0]),show.labels?'A':'','#ffaace',7.2);
+ if(k>=7&&show.first)point(g,to(A[1]),show.labels?'B':'','#ffaace',7.2);
+ if(k>=8&&show.first)point(g,to(A[2]),show.labels?'C':'','#ffaace',7.2);
+ if(k>=12&&show.second)line(g,to(D[0]),to(D[1]),'#8be6fc',2.8);
+ if(k>=10&&show.second)point(g,to(D[0]),show.labels?'D':'','#7fcfff',7.2);
+ if(k>=11&&show.second)point(g,to(D[1]),show.labels?'E':'','#7fcfff',7.2);
+ if(k>=13&&show.final)point(g,to(Q),show.labels?'Q(t)':'','#adffe5',9.5);
+ if(k>=14&&show.tangent){
+ const v=bezierVelocity(t),pp=to(Q),vx=v.x*(w-60),vy=v.y*(h-70),len=Math.hypot(vx,vy)||1,dist=Math.min(w,h)*.18;
+ line(g,{x:pp.x-vx/len*dist,y:pp.y-vy/len*dist},{x:pp.x+vx/len*dist,y:pp.y+vy/len*dist},'#edddff',2.2,[6,4]);
  }
- if(show.second){
-   line(g,to(D[0]),to(D[1]),'#80d7ff',2.8);
-   D.forEach((p,i)=>point(g,to(p),show.labels?['D','E'][i]:'','#76dfff',6.5));
+ if(k>=14)$('cubicStepText').textContent='t='+f2(t)+' · Q('+f2(Q.x)+', '+f2(1-Q.y)+')';
  }
- if(show.final){
-   if(t>.001){const trace=[];const n=Math.max(2,Math.ceil(t*175));for(let i=0;i<=n;i++)trace.push(to(bez3(P,t*i/n)));path(g,trace,'#affff0',2.8,19)}
-   point(g,to(Q),show.labels?'Q(t)':'','#affff0',9);
- }
- if(show.tangent){
-   const v={x:3*(1-t)**2*(P[1].x-P[0].x)+6*(1-t)*t*(P[2].x-P[1].x)+3*t*t*(P[3].x-P[2].x),y:3*(1-t)**2*(P[1].y-P[0].y)+6*(1-t)*t*(P[2].y-P[1].y)+3*t*t*(P[3].y-P[2].y)};
-   const px=to(Q),sx=Math.min(54,w*.09),sy=Math.min(45,h*.10),vx=v.x*(w-2*sx),vy=v.y*(h-2*sy),len=Math.hypot(vx,vy)||1,dist=Math.min(w,h)*.19;
-   line(g,{x:px.x-vx/len*dist,y:px.y-vy/len*dist},{x:px.x+vx/len*dist,y:px.y+vy/len*dist},'#edddff',2.3,[5,4]);
-   if(!show.final)point(g,px,show.labels?'Q(t)':'','#affff0',5);
- }
- // Control points are always visible/draggable, even with the polygon hidden.
- P.forEach((p,i)=>point(g,to(p),show.labels?'P'+i:'',i===0||i===3?'#abbbff':'#d29aff',8));
- $('cubicStepText').textContent=`t=${f2(t)} · Q(${f2(Q.x)}, ${f2(1-Q.y)})`;
+ P.forEach((p,i)=>point(g,to(p),show.labels?'P'+i:'',i===0||i===P.length-1?'#acbdff':'#cf9fff',8.5));
 }
 const updateCubicRaw=sliderPlay({slider:'cubicSlider',button:'cubicPlay',model:cubicModel,value:'cubicValue',live:'cubicLive'});
 const updateCubic=dt=>updateCubicRaw(dt*cubicSpeed);
-dragPoints('cubicCanvas',cubicModel.pts);
-function cubicSync(){const v=f2(cubicModel.t);$('cubicSlider').value=cubicModel.t;$('cubicValue').textContent=$('cubicLive').textContent=v;}
-$('cubicReset').onclick=()=>{cubicInitial.forEach((p,i)=>Object.assign(cubicModel.pts[i],p));cubicModel.t=.43;cubicModel.play=false;$('cubicPlay').textContent='▶ PLAY';cubicSync()};
-$('cubicRandom').onclick=()=>{cubicModel.pts.forEach((p,i)=>{p.x=Math.max(.06,Math.min(.94,Math.random()*.84+.08));p.y=Math.max(.06,Math.min(.94,Math.random()*.84+.08))});cubicModel.play=false;$('cubicPlay').textContent='▶ PLAY'};
+attachPointConstruction('cubicCanvas',cubicModel,4,cubicAdvance,cubicSync,true);
+$('cubicReset').onclick=()=>{
+ if(cubicView3d)setCubicView(false);
+ cubicModel.pts.length=0;cubicModel.stage=0;cubicModel.t=.5;cubicModel.play=false;
+ $('cubicPlay').textContent='▶ 곡선 따라가기';cubicSync();
+};
+$('cubicRandom').onclick=()=>{
+ if(cubicView3d)setCubicView(false);
+ cubicModel.pts.length=0;
+ for(let i=0;i<4;i++)cubicModel.pts.push({x:clamp(Math.random()*.78+.11,.06,.94),y:clamp(Math.random()*.78+.11,.06,.94)});
+ cubicModel.stage=4;cubicModel.t=.5;cubicModel.play=false;cubicSync();
+};
 $('cubicSpeed').oninput=e=>{cubicSpeed=+e.target.value;$('cubicSpeedOut').textContent=cubicSpeed.toFixed(2).replace(/0$/,'')+'×'};
 for(const box of document.querySelectorAll('[data-layer]'))box.addEventListener('change',()=>cubicLayers[box.dataset.layer]=box.checked);
-$('cubicShowAll').onclick=()=>{Object.keys(cubicLayers).forEach(k=>cubicLayers[k]=true);document.querySelectorAll('[data-layer]').forEach(box=>box.checked=true)};
+$('cubicShowAll').onclick=()=>{if(cubicModel.pts.length!==4){cubicModel.pts.length=0;cubicInitial.forEach(p=>cubicModel.pts.push({...p}))}cubicModel.stage=14;Object.keys(cubicLayers).forEach(k=>cubicLayers[k]=true);document.querySelectorAll('[data-layer]').forEach(box=>box.checked=true);cubicSync()};
+cubicSync();
 $('cubicFocus').onclick=()=>{
- const expanded=document.body.classList.toggle('cubic-focus');$('cubicFocus').textContent=expanded?'✕ CLOSE':'⛶ EXPAND';
+ const expanded=document.body.classList.toggle('cubic-focus');$('cubicFocus').textContent=expanded?'✕ 닫기':'⛶ 확대';
  $('cubicFocus').setAttribute('aria-expanded',String(expanded));
 };
 // Calculus: x(t)=t precisely because control-point x coordinates are 0,1/3,2/3,1.
