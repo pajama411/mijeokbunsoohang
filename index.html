@@ -118,7 +118,7 @@ body.edit-mode .notes-edit{display:block}
 body.lang-en .notes-edit{display:none}
 
 /* Click-by-click constructions: 3 placed points, midpoints, then the traced curve */
-.stage-meta{max-width:80%;line-height:1.45;color:#dce7fc;background:#07101fbe;padding:8px 11px;border:1px solid #ffffff23;border-radius:10px;z-index:2;font-size:11px;letter-spacing:0}
+.stage-meta{pointer-events:none;user-select:none;max-width:80%;line-height:1.45;color:#dce7fc;background:#07101fbe;padding:8px 11px;border:1px solid #ffffff23;border-radius:10px;z-index:2;font-size:11px;letter-spacing:0}
 button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
 #quadCanvas,#cubicCanvas,#lineCanvas{touch-action:none}
 #quadNext,#cubicStepBtn{background:linear-gradient(115deg,#6253b7,#32759e);border:1px solid #93bafa}
@@ -268,7 +268,7 @@ $('lineReset').onclick=()=>{lineModel.pts.length=0;lineModel.t=.5;lineModel.play
 const quadModel={pts:[],t:.5,play:false,stage:0};
 const quadStages=[
  '클릭하면 정해진 위치에 P₀가 나타납니다.','한 번 더 클릭하면 P₁가 나타납니다.','다시 클릭해 P₂를 놓으세요.',
- '예시 제어점 세 개를 놓았습니다. 점을 옮기거나 다음 단계를 누르세요.','P₀–P₁, P₁–P₂ 선분을 연결했습니다.',
+ '곡선이 나왔습니다. 점을 끌어 옮기거나 다음 단계에서 중점을 확인하세요.','P₀–P₁, P₁–P₂ 선분을 연결했습니다.',
  'P₀–P₁의 중점 A를 표시했습니다.','P₁–P₂의 중점 B를 표시했습니다.',
  '두 중점 A와 B를 연결했습니다.','A–B의 중점 Q를 표시했습니다.',
  '완성! 제어점을 드래그해 곡선을 바꾸거나, t를 움직여 Q(t)의 이동 경로를 확인하세요.'
@@ -287,8 +287,9 @@ function drawQuad(){const s=surface('quadCanvas');if(!s)return;const{g,w,h}=s,m=
  if(m.stage>=4){line(g,to(P[0]),to(P[1]),'#827fbdaa',1.8);line(g,to(P[1]),to(P[2]),'#827fbdaa',1.8)}
  if(m.pts.length===3){
  const a=lerp(P[0],P[1],t),b=lerp(P[1],P[2],t),q=lerp(a,b,t);
- if(m.stage>=9){const curve=[];for(let i=0;i<=170;i++)curve.push(to(bez2(P,i/170)));rainbow(g,curve,4.8);
- if(t>.003){const trace=[];for(let i=0;i<=90;i++)trace.push(to(bez2(P,i/90*t)));path(g,trace,'#a7ffe8',2.4,11)}}
+ /* Show the full curve as soon as P₂ appears; midpoint construction follows. */
+ {const curve=[];for(let i=0;i<=170;i++)curve.push(to(bez2(P,i/170)));rainbow(g,curve,4.8);
+ if(m.stage>=9&&t>.003){const trace=[];for(let i=0;i<=90;i++)trace.push(to(bez2(P,i/90*t)));path(g,trace,'#a7ffe8',2.4,11)}}
  if(m.stage>=7)line(g,to(a),to(b),'#80dfff',2.6);
  if(m.stage>=5)point(g,to(a),'A','#ffbde7',7.6);
  if(m.stage>=6)point(g,to(b),'B','#80c8fa',7.6);
@@ -317,7 +318,7 @@ function attachPointConstruction(id,model,maxCount,advance,sync,skipWhen3D=false
  c.addEventListener('pointermove',e=>{
   if(skipWhen3D&&cubicView3d)return;
   const p=pointerInside(e,c);
-  if(tracking){if(Math.hypot(p.x-startX,p.y-startY)>5)moved=true;
+  if(tracking){if(Math.hypot(p.x-startX,p.y-startY)>18)moved=true;
    if(dragging>=0&&moved){const pos=denormalized(p.w,p.h,p.x,p.y);model.pts[dragging]={x:clamp(pos.x,.04,.96),y:clamp(pos.y,.04,.96)};c.style.cursor='grabbing'}}
   else{const near=model.pts.some(q=>{const v=normalized(p.w,p.h,q);return Math.hypot(v.x-p.x,v.y-p.y)<19});c.style.cursor=near?'grab':'crosshair'}
  });
@@ -393,7 +394,7 @@ for(const type of ['pointerup','pointercancel'])orbitCanvas.addEventListener(typ
 orbitCanvas.addEventListener('wheel',e=>{if(!cubicView3d)return;e.preventDefault();orbit3d.zoom=clamp(orbit3d.zoom*(e.deltaY>0?.93:1.07),.6,1.65)},{passive:false});
 const cubicStages=[
  '클릭하면 정해진 위치에 P₀가 나타납니다.','클릭해서 P₁을 놓으세요.','클릭해서 P₂를 놓으세요.','클릭해서 P₃를 놓으세요.',
- '예시 제어점 네 개를 놓았습니다. 점을 옮기거나 다음 단계를 누르세요.','제어점 4개를 연결했습니다.',
+ '곡선이 나왔습니다. 점을 끌어 옮기거나 다음 단계에서 중점을 확인하세요.','제어점 4개를 연결했습니다.',
  'P₀–P₁의 중점 A를 표시했습니다.','P₁–P₂의 중점 B를 표시했습니다.','P₂–P₃의 중점 C를 표시했습니다.',
  'A, B, C를 선으로 연결했습니다.','A–B의 중점 D를 표시했습니다.','B–C의 중점 E를 표시했습니다.',
  'D와 E를 연결했습니다.','D–E의 중점 Q를 표시했습니다.',
@@ -421,8 +422,9 @@ function drawCubic(){
  if(P.length===4){
  const A=[lerp(P[0],P[1],t),lerp(P[1],P[2],t),lerp(P[2],P[3],t)];
  const D=[lerp(A[0],A[1],t),lerp(A[1],A[2],t)],Q=lerp(D[0],D[1],t);
- if(k>=14&&show.curve){const curve=[];for(let i=0;i<=200;i++)curve.push(to(bez3(P,i/200)));rainbow(g,curve,4.9);
-  if(t>.002){const trace=[];for(let i=0;i<=100;i++)trace.push(to(bez3(P,t*i/100)));path(g,trace,'#a9ffe7',2.7,16)}}
+ /* Show the full curve as soon as P₃ appears; midpoint construction follows. */
+ if(show.curve){const curve=[];for(let i=0;i<=200;i++)curve.push(to(bez3(P,i/200)));rainbow(g,curve,4.9);
+  if(k>=14&&t>.002){const trace=[];for(let i=0;i<=100;i++)trace.push(to(bez3(P,t*i/100)));path(g,trace,'#a9ffe7',2.7,16)}}
  if(k>=5&&show.control){for(let i=0;i<3;i++)line(g,to(P[i]),to(P[i+1]),'#8f92caa0',1.8,[6,4])}
  if(k>=9&&show.first){line(g,to(A[0]),to(A[1]),'#ffb5ddbe',2.1);line(g,to(A[1]),to(A[2]),'#ffb5ddbe',2.1)}
  if(k>=6&&show.first)point(g,to(A[0]),show.labels?'A':'','#ffaace',7.2);
@@ -555,7 +557,7 @@ const editableItems=[...document.querySelectorAll(editSelector)].filter(node=>!n
 editableItems.forEach((el,i)=>el.dataset.editId=String(i));
 const originalCopy=editableItems.map(el=>el.innerHTML);
 const originalNotes=slides.map(slide=>slide.dataset.note);
-const editStorage='curve-studio-v6:'+location.pathname;
+const editStorage='curve-studio-v7:'+location.pathname;
 let editing=false;
 function readEdits(){try{const saved=JSON.parse(localStorage.getItem(editStorage)||'null');if(!saved)return;for(const [i,markup] of Object.entries(saved.items||{})){if(editableItems[i]&&typeof markup==='string')editableItems[i].innerHTML=markup}for(const [i,note]of Object.entries(saved.notes||{})){if(slides[i]&&typeof note==='string')slides[i].dataset.note=note}}catch(err){console.warn('Autosave unavailable',err)}}
 function saveEdits(){try{localStorage.setItem(editStorage,JSON.stringify({items:Object.fromEntries(editableItems.map((el,i)=>[i,el.innerHTML])),notes:Object.fromEntries(slides.map((s,i)=>[i,s.dataset.note]))}))}catch(err){console.warn('Storage full or disabled',err)}}
