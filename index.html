@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<title>THE ART OF A CURVE — 미적분 I × Bézier</title>
+<title>베지어 곡선의 생성 원리와 미적분 I</title>
 <style>
 :root{--bg:#020207;--surface:#0b0c16;--line:#35314c;--white:#f7f6fe;--sub:#acacc3;--low:#73768d;--pink:#ff4acb;--purple:#9960ff;--blue:#4b83ff;--cyan:#4be8f4;--lime:#d5f899;--font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--white);font-family:var(--font);overflow:hidden}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #7dfdff;outline-offset:3px}a{color:#9cdbff}::-webkit-scrollbar{width:7px}::-webkit-scrollbar-thumb{background:#504566;border-radius:8px}
@@ -131,38 +131,38 @@ button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
 <body>
 <div id="app">
 <header class="topbar">
-  <div class="wordmark">CURVE<span>.STUDIO</span></div>
+  <div class="wordmark">베지어 <span>곡선</span></div>
   <nav class="top-center" aria-label="발표 슬라이드 이동" id="progress"></nav>
   <div class="top-actions"><span class="time" id="time">03:00</span><button class="ghost" id="editBtn" title="모든 슬라이드의 문구 편집 (E)" aria-pressed="false">✎ EDIT</button><button class="ghost save-html" id="exportBtn" title="수정된 문구를 포함한 HTML 파일 저장">↓ SAVE HTML</button><button class="ghost save-html" id="resetCopyBtn" title="문구를 원래대로 되돌리기">↺ RESET TEXT</button><button class="ghost" id="notesBtn" title="발표자 노트 (N)">NOTES</button><button class="ghost" id="fullBtn" title="전체 화면 (F)">↗ FULL</button><button class="ghost" id="shareBtn" title="현재 발표 사이트 링크 복사">↗ SHARE</button></div>
 </header>
 <main class="deck" id="deck">
 <!-- 01 -->
-<section class="slide active" data-seconds="12" data-chapter="INTRO" data-note="두 점을 이으면 직선이 됩니다. 그런데 점 하나를 더 놓고 두 점 사이를 일정한 비율로 움직이면 어떻게 될까요? 코딩애플의 베지어 곡선 설명에서 출발해, 이 과정이 어떻게 미적분 I의 2차·3차 다항함수와 미분으로 이어지는지 살펴보겠습니다.">
+<section class="slide active" data-seconds="12" data-chapter="도입" data-note="베지어 곡선이 어떻게 만들어지는지 직접 보여드리겠습니다. 먼저 빈 화면에 점을 찍고 선분의 중점을 구합니다. 중점을 찾는 과정을 반복한 뒤, 마지막 점을 움직여 곡선이 만들어지는 과정을 살펴보겠습니다.">
  <div class="hero">
   <div class="copy">
-   <div class="hero-number">2022 REVISED CALCULUS I / 03:00</div>
+   <div class="hero-number">2022 개정 미적분 I · 3분 발표</div>
    <h1>베지어<br><span class="spectrum">곡선.</span></h1>
    <p class="body">점을 하나씩 놓고 중점을 반복해서 구하면<br><strong>곡선이 만들어지는 과정을 확인할 수 있다.</strong></p>
    <button class="ghost" id="heroStart">시작하기 &nbsp; →</button>
-   <div class="hero-bottom">2022 CALCULUS I &nbsp; <span>×</span> &nbsp; BÉZIER CURVES</div>
+   <div class="hero-bottom">선형 보간 → 2차·3차 곡선 → 미분계수</div>
   </div>
   <div class="ribbon-wrap"><canvas id="heroCanvas" aria-label="무지갯빛으로 빛나는 추상 베지어 곡선 애니메이션"></canvas></div>
  </div>
 </section>
 <!-- 02 -->
-<section class="slide" data-seconds="20" data-chapter="INTERPOLATION" data-note="점 두 개를 이으면 직선밖에 나오지 않습니다. 그 직선 위에 움직이는 점을 하나 만듭니다. 위치는 왼쪽 점에 1 빼기 t를 곱하고 오른쪽 점에 t를 곱해서 더합니다. t가 0이면 왼쪽 끝, 1이면 오른쪽 끝입니다. 미적분 I 관점에서는 t에 대한 1차식이 출발점입니다.">
+<section class="slide" data-seconds="18" data-chapter="직선 보간" data-note="먼저 점을 두 번 찍어 직선을 만들겠습니다. 두 점 사이의 점은 (1-t)P0+tP1로 나타냅니다. t가 0이면 P0, 1이면 P1이고, 0.5이면 두 점의 중점입니다. 이제 이 계산을 여러 번 반복해 보겠습니다.">
  <div class="layout">
   <div class="copy"><div class="eyebrow"><span class="beam"></span>01 / INTERPOLATION</div><h2 class="h2">먼저 두 점을 찍고<br><span class="spectrum">직선을 만든다.</span></h2><p class="body">빈 그래프를 두 번 클릭해 점을 놓자. 두 점 사이의 위치는 <strong>(1−t)P₀ + tP₁</strong>로 계산한다. t=0.5이면 정확히 중점이다.</p><div class="math-tag">선형 보간</div><div class="formula">L(t) = <strong>(1 − t)</strong>P₀ + <strong>t</strong>P₁</div><div class="microline">t=0.5 → 중점 · t=0~1 → 두 점을 잇는 직선</div></div>
   <div class="stage"><div class="stage-bar"><span>01 / 직선 만들기</span><span class="live">● INTERACTIVE</span></div><div class="viz"><div class="stage-meta" id="lineInstruction">빈 곳을 클릭해 첫 번째 점 P₀를 찍으세요.</div><canvas id="lineCanvas" aria-label="두 점 사이 선형 보간을 탐색하는 그래프"></canvas><div class="glass-label">t = <b id="lineLive">0.50</b></div></div><div class="controls"><label for="lineSlider">위치 t</label><input type="range" class="slider" id="lineSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="lineValue">0.50</output><button class="ui-btn" id="linePlay" disabled>▶ 움직이기</button><button class="ui-btn" id="lineReset">↺ 다시 시작</button></div></div>
  </div>
 </section>
 <!-- 03 -->
-<section class="slide" data-seconds="32" data-chapter="QUADRATIC" data-note="직선을 곡선으로 바꾸려면 어떻게 할까요? 세 번째 제어점 하나를 직선 바깥에 둡니다. 이제 첫 번째와 두 번째 점 사이에 A, 두 번째와 세 번째 점 사이에 B를 만듭니다. A와 B 사이에 다시 새 점 Q를 만들고 t를 계속 바꾸면, Q가 지나가는 길이 2차 베지어 곡선입니다. 계산을 정리하면 t에 관한 2차 다항식이 됩니다.">
+<section class="slide" data-seconds="42" data-chapter="2차 베지어" data-note="빈 화면에 세 점을 찍겠습니다. 두 선분을 잇고, 각 선분의 중점 A와 B를 표시하겠습니다. 두 중점을 연결하고 그 중점 Q를 찍으면 점이 하나 정해집니다. 이때 t는 0.5입니다. 그런데 t를 계속 바꾸면 A와 B의 위치도 바뀌고, 마지막 점 Q가 지나간 자취가 2차 베지어 곡선이 됩니다.">
  <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>02 / 선형 보간 반복</div><h2 class="h2">세 점으로 만드는<br><span class="spectrum">2차 베지어 곡선</span></h2><p class="body">화면에 <strong>세 점</strong>을 직접 찍는다. t=0.5에서 두 선분의 <strong>중점 A, B</strong>를 찾고, 다시 그 둘의 <strong>중점 Q</strong>를 구한다. t를 바꾸면 Q의 이동 경로가 곡선이 된다.</p><div class="formula">Q(t) = (1−t)A(t) + tB(t)<br><strong>B₂(t) = (1−t)²P₀ + 2(1−t)tP₁ + t²P₂</strong></div><div class="microline">처음에는 중점(t=0.5) · 마지막에는 t를 변화시켜 곡선 확인</div></div>
  <div class="stage"><div class="stage-bar"><span>02 / 중점으로 곡선 만들기</span><span class="live">● LIVE GEOMETRY</span></div><div class="viz"><div class="stage-meta" id="quadInstruction">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="quadCanvas" aria-label="세 제어점으로 이차 베지어 곡선을 만드는 애니메이션"></canvas><div class="glass-label">B₂(<b id="quadLive">0.50</b>)</div></div><div class="controls"><label for="quadSlider">위치 t</label><input type="range" class="slider" id="quadSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="quadValue">0.50</output><button class="ui-btn primary" id="quadNext">다음 단계 →</button><button class="ui-btn" id="quadPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn" id="quadReset">↺ 초기화</button></div></div></div>
 </section>
 <!-- 04 -->
-<section class="slide" data-seconds="26" data-chapter="CUBIC BÉZIER" data-note="같은 방법에서 제어점을 하나 더 추가하면 네 점이 됩니다. 첫 번째 보간에서 세 점 A, B, C가 생기고, 다음 단계에서 D와 E, 마지막에 Q 하나가 생깁니다. Q의 움직임이 3차 베지어 곡선입니다. 수식을 펼치면 3차 다항식이 되기 때문에, 다음 장에서 미적분 I의 도함수로 곡선의 순간적인 기울기를 계산할 수 있습니다. 제어점을 한 번 움직여 보겠습니다.">
+<section class="slide" data-seconds="36" data-chapter="3차 베지어" data-note="이번에는 네 점을 직접 놓고 같은 방법을 한 단계 더 반복하겠습니다. 각 선분에서 A, B, C를 구한 다음 이 점들을 연결합니다. 다시 중점 D와 E를 구하고 연결한 뒤, 그 중점 Q를 구합니다. t를 0에서 1까지 변화시키면 Q의 경로가 3차 베지어 곡선입니다. 이것이 네 개의 제어점으로 곡선을 만드는 방법입니다.">
  <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>03 / 선형 보간 3회 반복</div><h2 class="h2">네 점으로 만드는<br><span class="spectrum">3차 베지어 곡선</span></h2><p class="body">빈 화면에 <strong>네 점</strong>을 찍는다. 각 선분에서 점 <strong>A·B·C</strong>를 만들고, 다시 <strong>D·E</strong>, 마지막으로 <strong>Q</strong>를 구한다. t를 0~1까지 바꾸면 3차 곡선이 만들어진다.</p><div class="formula" style="font-size:clamp(11px,1vw,15px)">B₃(t) = (1−t)³P₀ + 3(1−t)²tP₁<br>　　　+ 3(1−t)t²P₂ + t³P₃</div><div class="microline">미적분 I 연결 · 3차 다항함수 → 미분하면 2차</div></div>
  <div class="stage cubic-stage" id="cubicStage"><div class="stage-bar"><span>03 / 네 점으로 곡선 만들기</span><div class="view-tabs" role="group" aria-label="2D 또는 3D 시각화"><button id="cubicView2D" type="button" class="view-tab on" aria-pressed="true">2D</button><button id="cubicView3D" type="button" class="view-tab" aria-pressed="false">3D SPEED</button></div></div><div class="viz"><div class="stage-meta" id="cubicHint">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="cubicCanvas" aria-label="네 제어점을 이동할 수 있는 삼차 베지어 곡선 그래프"></canvas><div class="glass-label"><b id="cubicLive">0.50</b> &nbsp; / &nbsp; CURVE</div></div><div class="controls"><label for="cubicSlider">위치 t</label><input type="range" class="slider" id="cubicSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="cubicValue">0.50</output><button class="ui-btn" id="cubicPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn primary" id="cubicStepBtn" title="다음 구성 단계 표시">다음 단계 →</button><button class="ui-btn" id="cubicReset" title="빈 화면부터 다시 시작">↺ 초기화</button><button class="ui-btn" id="cubicFocus" title="그래프를 화면 크게 보기 (Z)">⛶ 확대</button></div>
  <div class="cubic-toolbox">
@@ -181,17 +181,17 @@ button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
  </div></div></div>
 </section>
 <!-- 05 -->
-<section class="slide calculus" data-seconds="64" data-chapter="CALCULUS I" data-note="이제 수행평가의 핵심인 미적분 I입니다. 제어점의 가로좌표를 0, 3분의 1, 3분의 2, 1로 고정하면 x는 t와 같아지고, 세로좌표 f(t)는 3차다항함수가 됩니다. 두 지점 사이의 평균변화율은 f(t+h) 빼기 f(t)를 h로 나눈 값입니다. 그래프에서 Δt를 줄여 보겠습니다. 두 점을 잇는 할선이 접선에 가까워지고, 평균변화율이 미분계수로 수렴합니다. 3차다항함수 At세제곱 더하기 Bt제곱 더하기 Ct 더하기 D를 미분하면 도함수는 3At제곱 더하기 2Bt 더하기 C입니다. 오른쪽 아래 도함수 그래프도 2차함수로 나타납니다. t를 움직이거나 제어점을 올리고 내려 기울기가 함께 바뀌는 것을 확인할 수 있습니다. 즉 곡선의 디자인을 미분계수와 접선의 방정식으로 설명한 것입니다.">
- <div class="layout"><div class="copy calc-copy"><div class="eyebrow"><span class="beam"></span>04 / 2022 CALCULUS I · DIFFERENTIATION</div><h2 class="h2">평균변화율과<br><span class="spectrum">접선의 기울기</span></h2><p class="body">제어점의 가로좌표를 <strong>0, ⅓, ⅔, 1</strong>로 두면 <strong>x(t)=t</strong>. 세로좌표는 3차다항함수가 된다. <strong>평균변화율이 순간변화율로 수렴</strong>하는 것을 직접 확인하자.</p><div class="formula"><span class="formula-top">3차다항함수 · 미적분 I</span>f(t) = At³ + Bt² + Ct + D</div><div class="limit-line"><span>평균변화율 → 미분계수의 극한</span><b>f′(t) = lim<sub>h→0</sub> [f(t+h)−f(t)] / h</b></div><div class="formula"><span class="formula-top">도함수 · 접선의 방정식</span><strong>f′(t) = 3At² + 2Bt + C</strong><br>y−f(t₀) = f′(t₀)(x−t₀)</div><div class="math-live-coeff">현재 다항식: <span id="polyLive">계수 계산 중…</span></div></div>
+<section class="slide calculus" data-seconds="50" data-chapter="미적분 I" data-note="이제 미적분 I의 개념으로 연결하겠습니다. 네 제어점의 가로좌표를 0, 3분의 1, 3분의 2, 1로 고정하면 x=t이고, y는 t에 관한 3차다항함수가 됩니다. 이 함수의 평균변화율은 f(t+h)-f(t)를 h로 나눈 값입니다. h를 0에 가깝게 하면 할선이 접선에 가까워지고, 평균변화율은 미분계수로 수렴합니다. 3차다항함수를 미분하면 2차다항함수가 되며, 도함수 값으로 접선의 기울기를 구할 수 있습니다.">
+ <div class="layout"><div class="copy calc-copy"><div class="eyebrow"><span class="beam"></span>04 / 미적분 I: 도함수와 미분계수</div><h2 class="h2">평균변화율과<br><span class="spectrum">접선의 기울기</span></h2><p class="body">제어점의 가로좌표를 <strong>0, ⅓, ⅔, 1</strong>로 두면 <strong>x(t)=t</strong>. 세로좌표는 3차다항함수가 된다. <strong>평균변화율이 순간변화율로 수렴</strong>하는 것을 직접 확인하자.</p><div class="formula"><span class="formula-top">3차다항함수 · 미적분 I</span>f(t) = At³ + Bt² + Ct + D</div><div class="limit-line"><span>평균변화율 → 미분계수의 극한</span><b>f′(t) = lim<sub>h→0</sub> [f(t+h)−f(t)] / h</b></div><div class="formula"><span class="formula-top">도함수 · 접선의 방정식</span><strong>f′(t) = 3At² + 2Bt + C</strong><br>y−f(t₀) = f′(t₀)(x−t₀)</div><div class="math-live-coeff">현재 다항식: <span id="polyLive">계수 계산 중…</span></div></div>
  <div class="stage calc-stage"><div class="stage-bar"><span>04 / 미분계수 확인 · x = t</span><span class="live">● 미적분 I</span></div><div class="viz"><div class="stage-meta">DRAG CONTROL POINTS ↑ ↓</div><canvas id="calcCanvas" aria-label="세로로 움직이는 제어점과 접선의 기울기 시각화"></canvas><div class="glass-label">|평균−순간| <b id="calcError">—</b></div></div><div class="chart-tabs" role="group" aria-label="미적분 I 차트 전환"><button class="chart-tab on" data-chart="derivative" aria-pressed="true">f′(t) 도함수</button><button class="chart-tab" data-chart="error" aria-pressed="false">Δt 오차</button><button class="chart-tab" data-chart="compare" aria-pressed="false">기울기 비교</button></div><div class="calc-deriv"><canvas id="derivCanvas" aria-label="3차함수의 도함수인 2차함수 그래프"></canvas><div class="derivative-label" id="chartLabel">f′(t) / SLOPE</div></div><div class="calc-legend"><div class="stat">POINT t<strong id="statT">0.55</strong></div><div class="stat">f(t)<strong id="statY">0.00</strong></div><div class="stat">평균변화율<strong id="statAvg">—</strong></div><div class="stat">순간변화율 f′(t)<strong id="statD">0.00</strong></div></div><div class="calc-controls"><div class="controls"><label for="calcSlider">위치 t</label><input type="range" class="slider" id="calcSlider" min="0" max="1" step="0.005" value="0.55"><output class="readout" id="calcValue">0.55</output></div><div class="controls"><label for="calcHSlider">간격 Δt → 0</label><input type="range" class="slider" id="calcHSlider" min="0.005" max="0.28" step="0.005" value="0.22"><output class="readout" id="calcHValue">0.220</output></div></div></div></div>
 </section>
 <!-- 06 -->
-<section class="slide" data-seconds="12" data-chapter="CSS ANIMATION" data-note="마지막으로 미분이 실제 웹 디자인에 어떻게 이어지는지 보겠습니다. CSS의 cubic-bezier는 시간에 따른 진행률을 곡선으로 정합니다. 직선과 곡선을 사용한 움직임을 비교해 보면, 같은 시간이어도 순간 속도가 달라집니다.">
+<section class="slide" data-seconds="10" data-chapter="CSS 응용" data-note="이 원리는 웹 애니메이션에도 쓰입니다. CSS cubic-bezier는 시간에 따른 진행률을 정하며, 곡선에 따라 움직임의 속도가 달라집니다.">
  <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>05 / 웹 애니메이션</div><h2 class="h2">CSS에서 쓰는<br><span class="spectrum">베지어 곡선</span></h2><p class="body">CSS에서는 시간에 따른 <strong>이동 진행률</strong>을 베지어 곡선으로 정한다. 이 곡선의 기울기가 화면 속 <strong>순간적인 움직임의 속도</strong>를 설명한다.</p><div class="code-snippet"><span class="muted">/* CSS */</span><br><span class="pink">transition-timing-function:</span><br>&nbsp; <span class="mint" id="easeCode">cubic-bezier(.34, 1.56, .64, 1)</span>;</div><div class="easing-options"><button class="preset" data-preset="smooth">SMOOTH</button><button class="preset selected" data-preset="spring">OVERSHOOT</button><button class="preset" data-preset="slow">SLOW IN</button><button class="preset" data-preset="linear">LINEAR</button></div><div class="microline">곡선의 두 제어점도 드래그 가능</div></div>
  <div class="stage ease-stage"><div class="stage-bar"><span>05 / 움직임 비교</span><span class="live">● CSS</span></div><div class="viz"><div class="stage-meta">DRAG HANDLES P₁ / P₂</div><canvas id="easeCanvas" aria-label="CSS cubic-bezier 타이밍 함수 그래프. 두 제어점을 드래그할 수 있음"></canvas></div><div class="race"><div class="race-row"><div class="race-title">LINEAR</div><div class="race-track" id="linearTrack"><span class="race-dot linear" id="linearDot"></span></div></div><div class="race-row"><div class="race-title">BÉZIER</div><div class="race-track" id="easeTrack"><span class="race-dot" id="easeDot"></span></div></div></div><div class="ease-bottom"><p class="small">같은 시간 · 다른 변화율 → 다른 속도</p><button class="ui-btn primary" id="easePlay">▶ RUN MOTION</button></div></div></div>
 </section>
 <!-- 07 -->
-<section class="slide" data-seconds="14" data-chapter="CONCLUSION" data-note="이번 탐구에서 저는 단순히 점을 이은 직선에 새로운 점을 추가하고 같은 계산을 반복하면 곡선이 만들어진다는 것을 배웠습니다. 특히 3차 베지어 곡선을 다항함수로 나타낸 뒤, 평균변화율을 접선의 기울기와 비교하면서 미적분 I의 미분계수를 실제 그래프에서 이해할 수 있었습니다. 이제 디자인 속 곡선도 수학적으로 바라보게 되었습니다. 감사합니다.">
+<section class="slide" data-seconds="12" data-chapter="정리" data-note="선형 보간을 반복해 곡선을 만들 수 있다는 사실을 배웠습니다. 특히 t를 변화시켰을 때 점의 자취가 곡선이 되고, 도함수로 그 변화를 설명할 수 있다는 점이 인상 깊었습니다. 감사합니다.">
  <div class="ending-glow"></div><div class="ending"><div class="eyebrow"><span class="beam"></span>06 / 탐구 정리</div><h2>탐구 결과와<br><span class="spectrum">느낀 점</span></h2><div class="ending-grid"><div class="ending-card"><div class="num">01 · 새롭게 배운 점</div><h3>중점을 반복해서 곡선을 만들 수 있었다</h3><p>직선의 선형 보간을 반복하면 2차·3차다항식으로 표현되는 베지어 곡선이 만들어진다는 것을 배웠다.</p></div><div class="ending-card"><div class="num">02 · 미적분 I과의 연결</div><h3>도함수로 접선 기울기를 구했다</h3><p>평균변화율이 순간변화율로 수렴하고, 3차다항함수의 도함수로 접선 기울기를 계산할 수 있음을 확인했다.</p></div><div class="ending-card"><div class="num">03 · 느낀 점</div><h3>직접 움직여 보니 이해하기 쉬웠다</h3><p>제어점을 움직이면 곡선과 도함수가 함께 변하는 모습을 보며, 수업에서 배운 미분이 실제 화면의 모양을 설명한다는 점이 인상 깊었다.</p></div></div><div class="source">INSPIRED BY <a href="https://codingapple.com/blog/bezier-curve/" target="_blank" rel="noopener noreferrer">CODINGAPPLE / 베지어 곡선 직접 만져보기</a> &nbsp;·&nbsp; CSS REFERENCE <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/easing-function/cubic-bezier" target="_blank" rel="noopener noreferrer">MDN</a></div></div>
 </section>
 </main>
@@ -544,7 +544,7 @@ const editableItems=[...document.querySelectorAll(editSelector)].filter(node=>!n
 editableItems.forEach((el,i)=>el.dataset.editId=String(i));
 const originalCopy=editableItems.map(el=>el.innerHTML);
 const originalNotes=slides.map(slide=>slide.dataset.note);
-const editStorage='curve-studio-v4:'+location.pathname;
+const editStorage='curve-studio-v5:'+location.pathname;
 let editing=false;
 function readEdits(){try{const saved=JSON.parse(localStorage.getItem(editStorage)||'null');if(!saved)return;for(const [i,markup] of Object.entries(saved.items||{})){if(editableItems[i]&&typeof markup==='string')editableItems[i].innerHTML=markup}for(const [i,note]of Object.entries(saved.notes||{})){if(slides[i]&&typeof note==='string')slides[i].dataset.note=note}}catch(err){console.warn('Autosave unavailable',err)}}
 function saveEdits(){try{localStorage.setItem(editStorage,JSON.stringify({items:Object.fromEntries(editableItems.map((el,i)=>[i,el.innerHTML])),notes:Object.fromEntries(slides.map((s,i)=>[i,s.dataset.note]))}))}catch(err){console.warn('Storage full or disabled',err)}}
@@ -571,13 +571,13 @@ $('exportBtn').onclick=()=>{
 
 /* Bilingual display: keep Korean text and local edits intact, show English on demand. */
 const englishNotes=[
- 'A straight line comes from joining two points. What if we interpolate the points repeatedly? We will see how this creates Bézier curves, and how Calculus I explains their change.',
- 'A point between two endpoints is L(t)=(1−t)P0+tP1. At t=0 it is the first endpoint; at t=1 it is the other. This is a linear function of t.',
- 'Add a third control point. Construct A on the first segment and B on the second, then interpolate A and B again. The moving point Q traces a quadratic Bézier curve.',
- 'With four control points, first form A,B,C, then D,E, and finally Q. Repeated linear interpolation produces a cubic polynomial in t. Drag the points to investigate.',
- 'For Calculus I, we fix control-point x values at 0,1/3,2/3,1 so x=t. The vertical coordinate is a cubic polynomial f(t). Reduce delta t and watch the average slope approach the instantaneous derivative. The derivative is a quadratic polynomial, shown in the chart. This gives the tangent line.',
- 'CSS cubic-bezier controls progress over time. Even for the same distance and duration, the instantaneous speed can change. Compare the two animations.',
- 'I learned that repeated linear interpolation makes polynomial curves. By comparing secants and tangents, I understood the derivative as a limit of average rates of change, not just a memorized formula.'
+ 'I will show how a Bézier curve is constructed by placing points and taking midpoints.',
+ 'Click twice to place two points. L(t)=(1−t)P0+tP1. At t=0.5 the moving point is the midpoint.',
+ 'Place three control points, draw two segments, mark their midpoints A and B, connect A and B, then mark midpoint Q. As t varies from 0 to 1, Q traces a quadratic Bézier curve.',
+ 'Place four control points. Mark A, B, C along consecutive segments. Then mark D, E, and finally Q. As t changes, Q traces a cubic Bézier curve.',
+ 'Set the control point x-coordinates to 0, 1/3, 2/3, and 1, so x=t. The y-coordinate is a cubic polynomial. As h approaches zero, the secant slope approaches the tangent slope. The derivative of a cubic is quadratic.',
+ 'CSS cubic-bezier uses a curve to control progress over time, changing the instantaneous rate of motion.',
+ 'I learned that repeated interpolation creates a curve and that a derivative explains its instantaneous slope. Thank you.'
 ];
 const englishCopy=[
  {'.hero h1':'THE ART<br>OF A<br><span class="spectrum">CURVE.</span>','.hero .body':'Create a curve from moving lines.<br><strong>Explain its change with Calculus I.</strong>','.hero-bottom':'2022 CALCULUS I &nbsp; <span>×</span> &nbsp; BÉZIER CURVES'},
