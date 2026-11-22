@@ -153,13 +153,13 @@ button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
 <section class="slide" data-seconds="20" data-chapter="INTERPOLATION" data-note="점 두 개를 이으면 직선밖에 나오지 않습니다. 그 직선 위에 움직이는 점을 하나 만듭니다. 위치는 왼쪽 점에 1 빼기 t를 곱하고 오른쪽 점에 t를 곱해서 더합니다. t가 0이면 왼쪽 끝, 1이면 오른쪽 끝입니다. 미적분 I 관점에서는 t에 대한 1차식이 출발점입니다.">
  <div class="layout">
   <div class="copy"><div class="eyebrow"><span class="beam"></span>01 / INTERPOLATION</div><h2 class="h2">먼저 두 점을 찍고<br><span class="spectrum">직선을 만든다.</span></h2><p class="body">빈 그래프를 두 번 클릭해 점을 놓자. 두 점 사이의 위치는 <strong>(1−t)P₀ + tP₁</strong>로 계산한다. t=0.5이면 정확히 중점이다.</p><div class="math-tag">선형 보간</div><div class="formula">L(t) = <strong>(1 − t)</strong>P₀ + <strong>t</strong>P₁</div><div class="microline">t=0.5 → 중점 · t=0~1 → 두 점을 잇는 직선</div></div>
-  <div class="stage"><div class="stage-bar"><span>01 / 직선 만들기</span><span class="live">● INTERACTIVE</span></div><div class="viz"><div class="stage-meta" id="lineInstruction">빈 곳을 클릭해 첫 번째 점 P₀를 찍으세요.</div><canvas id="lineCanvas" aria-label="두 점 사이 선형 보간을 탐색하는 그래프"></canvas><div class="glass-label">t = <b id="lineLive">0.35</b></div></div><div class="controls"><label for="lineSlider">위치 t</label><input type="range" class="slider" id="lineSlider" min="0" max="1" step="0.005" value="0.35"><output class="readout" id="lineValue">0.35</output><button class="ui-btn" id="linePlay" disabled>▶ 움직이기</button><button class="ui-btn" id="lineReset">↺ 다시 시작</button></div></div>
+  <div class="stage"><div class="stage-bar"><span>01 / 직선 만들기</span><span class="live">● INTERACTIVE</span></div><div class="viz"><div class="stage-meta" id="lineInstruction">빈 곳을 클릭해 첫 번째 점 P₀를 찍으세요.</div><canvas id="lineCanvas" aria-label="두 점 사이 선형 보간을 탐색하는 그래프"></canvas><div class="glass-label">t = <b id="lineLive">0.50</b></div></div><div class="controls"><label for="lineSlider">위치 t</label><input type="range" class="slider" id="lineSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="lineValue">0.50</output><button class="ui-btn" id="linePlay" disabled>▶ 움직이기</button><button class="ui-btn" id="lineReset">↺ 다시 시작</button></div></div>
  </div>
 </section>
 <!-- 03 -->
 <section class="slide" data-seconds="32" data-chapter="QUADRATIC" data-note="직선을 곡선으로 바꾸려면 어떻게 할까요? 세 번째 제어점 하나를 직선 바깥에 둡니다. 이제 첫 번째와 두 번째 점 사이에 A, 두 번째와 세 번째 점 사이에 B를 만듭니다. A와 B 사이에 다시 새 점 Q를 만들고 t를 계속 바꾸면, Q가 지나가는 길이 2차 베지어 곡선입니다. 계산을 정리하면 t에 관한 2차 다항식이 됩니다.">
  <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>02 / 선형 보간 반복</div><h2 class="h2">세 점으로 만드는<br><span class="spectrum">2차 베지어 곡선</span></h2><p class="body">화면에 <strong>세 점</strong>을 직접 찍는다. t=0.5에서 두 선분의 <strong>중점 A, B</strong>를 찾고, 다시 그 둘의 <strong>중점 Q</strong>를 구한다. t를 바꾸면 Q의 이동 경로가 곡선이 된다.</p><div class="formula">Q(t) = (1−t)A(t) + tB(t)<br><strong>B₂(t) = (1−t)²P₀ + 2(1−t)tP₁ + t²P₂</strong></div><div class="microline">처음에는 중점(t=0.5) · 마지막에는 t를 변화시켜 곡선 확인</div></div>
- <div class="stage"><div class="stage-bar"><span>02 / 중점으로 곡선 만들기</span><span class="live">● LIVE GEOMETRY</span></div><div class="viz"><div class="stage-meta" id="quadInstruction">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="quadCanvas" aria-label="세 제어점으로 이차 베지어 곡선을 만드는 애니메이션"></canvas><div class="glass-label">B₂(<b id="quadLive">0.36</b>)</div></div><div class="controls"><label for="quadSlider">위치 t</label><input type="range" class="slider" id="quadSlider" min="0" max="1" step="0.005" value="0.36"><output class="readout" id="quadValue">0.36</output><button class="ui-btn primary" id="quadNext">다음 단계 →</button><button class="ui-btn" id="quadPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn" id="quadReset">↺ 초기화</button></div></div></div>
+ <div class="stage"><div class="stage-bar"><span>02 / 중점으로 곡선 만들기</span><span class="live">● LIVE GEOMETRY</span></div><div class="viz"><div class="stage-meta" id="quadInstruction">빈 화면을 클릭해 P₀를 찍으세요.</div><canvas id="quadCanvas" aria-label="세 제어점으로 이차 베지어 곡선을 만드는 애니메이션"></canvas><div class="glass-label">B₂(<b id="quadLive">0.50</b>)</div></div><div class="controls"><label for="quadSlider">위치 t</label><input type="range" class="slider" id="quadSlider" min="0" max="1" step="0.005" value="0.5"><output class="readout" id="quadValue">0.50</output><button class="ui-btn primary" id="quadNext">다음 단계 →</button><button class="ui-btn" id="quadPlay" disabled>▶ 곡선 따라가기</button><button class="ui-btn" id="quadReset">↺ 초기화</button></div></div></div>
 </section>
 <!-- 04 -->
 <section class="slide" data-seconds="26" data-chapter="CUBIC BÉZIER" data-note="같은 방법에서 제어점을 하나 더 추가하면 네 점이 됩니다. 첫 번째 보간에서 세 점 A, B, C가 생기고, 다음 단계에서 D와 E, 마지막에 Q 하나가 생깁니다. Q의 움직임이 3차 베지어 곡선입니다. 수식을 펼치면 3차 다항식이 되기 때문에, 다음 장에서 미적분 I의 도함수로 곡선의 순간적인 기울기를 계산할 수 있습니다. 제어점을 한 번 움직여 보겠습니다.">
@@ -243,15 +243,93 @@ function pointerInside(e,c){const r=c.getBoundingClientRect();return{x:e.clientX
 function dragPoints(canvasId,points,transform){const canvas=$(canvasId);let index=-1;canvas.addEventListener('pointerdown',e=>{if(canvasId==='cubicCanvas'&&cubicView3d)return;const p=pointerInside(e,canvas);let best=25;points.forEach((q,i)=>{const px=normalized(p.w,p.h,q);const dist=Math.hypot(p.x-px.x,p.y-px.y);if(dist<best){best=dist;index=i}});if(index>=0){canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';e.preventDefault()}});canvas.addEventListener('pointermove',e=>{if(canvasId==='cubicCanvas'&&cubicView3d)return;const p=pointerInside(e,canvas);if(index>=0){const pos=denormalized(p.w,p.h,p.x,p.y);const q=transform?transform(pos,index):{x:clamp(pos.x,.015,.985),y:clamp(pos.y,.015,.985)};points[index].x=q.x;points[index].y=q.y}else{canvas.style.cursor=points.some(q=>{const pp=normalized(p.w,p.h,q);return Math.hypot(pp.x-p.x,pp.y-p.y)<20})?'grab':'crosshair'}});const stop=()=>{index=-1;canvas.style.cursor='crosshair'};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop)}
 // Hero: glossy rainbow ribbons drawn from animated cubic curves.
 function hero(ts){const s=surface('heroCanvas');if(!s)return;const{g,w,h}=s;g.clearRect(0,0,w,h);let time=ts/1000;const glow=g.createRadialGradient(w*.55,h*.50,20,w*.55,h*.50,w*.6);glow.addColorStop(0,'#19144288');glow.addColorStop(1,'#07061100');g.fillStyle=glow;g.fillRect(0,0,w,h);const palette=['#ff5be3','#a449ff','#6755ff','#33b8ff','#44f0cd','#dfff8e','#ff8ca8'];for(let k=0;k<8;k++){const sh=Math.sin(time*.34+k*.48)*h*.025;const st={x:w*(.12+k*.008),y:h*(.71-k*.017)+sh};const a={x:w*(.26+k*.016),y:h*(.10+k*.003)+sh};const b={x:w*(.70+k*.009),y:h*(.90-k*.016)+sh};const end={x:w*(.88-k*.009),y:h*(.25+k*.009)+sh};const pts=[];for(let j=0;j<=88;j++)pts.push(bez3([st,a,b,end],j/88));g.globalCompositeOperation='screen';path(g,pts,palette[k%palette.length],k===0?3.2:1.45,k===0?30:17)}g.globalCompositeOperation='source-over';const ellipse=g.createRadialGradient(w*.75,h*.24,0,w*.75,h*.24,w*.34);ellipse.addColorStop(0,'#8035ff27');ellipse.addColorStop(1,'#00000000');g.fillStyle=ellipse;g.fillRect(0,0,w,h);}
-// Line interpolation
-const lineModel={pts:[{x:.13,y:.70},{x:.86,y:.25}],t:.35,play:false};
-function drawLine(){const s=surface('lineCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h);const p=lineModel.pts.map(p=>normalized(w,h,p));line(g,p[0],p[1],'#a487fe',2.4);const v=normalized(w,h,lerp(lineModel.pts[0],lineModel.pts[1],lineModel.t));line(g,p[0],v,'#55e6fa',4);point(g,p[0],'P₀','#ff9fdb',7);point(g,p[1],'P₁','#aeb7ff',7);point(g,v,'L(t)','#70ffe0',8);g.font='12px ui-monospace,monospace';g.fillStyle='#a6b2d7';g.fillText('t = 0',p[0].x-5,p[0].y+30);g.fillText('t = 1',p[1].x-5,p[1].y+31)}
-function sliderPlay({slider,button,model,value,live}){const el=$(slider),out=$(value),status=$(live),play=$(button);el.oninput=()=>{model.t=+el.value;model.play=false;play.textContent='▶ PLAY';out.textContent=status.textContent=f2(model.t)};play.onclick=()=>{model.play=!model.play;play.textContent=model.play?'Ⅱ PAUSE':'▶ PLAY'};return dt=>{if(!model.play)return;model.t+=dt*.38;if(model.t>1)model.t=0;el.value=model.t;out.textContent=status.textContent=f2(model.t)}}
-const updateLine=sliderPlay({slider:'lineSlider',button:'linePlay',model:lineModel,value:'lineValue',live:'lineLive'});dragPoints('lineCanvas',lineModel.pts);
-// Quadratic / De Casteljau
-const quadModel={pts:[{x:.14,y:.78},{x:.47,y:.15},{x:.87,y:.73}],t:.36,play:false};
-function drawQuad(){const s=surface('quadCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h);const P=quadModel.pts,t=quadModel.t,curve=[];for(let i=0;i<=150;i++)curve.push(normalized(w,h,bez2(P,i/150)));rainbow(g,curve,4.6);poly(g,P,w,h);const a=lerp(P[0],P[1],t),b=lerp(P[1],P[2],t),q=lerp(a,b,t);line(g,normalized(w,h,a),normalized(w,h,b),'#e6b4fe',2);point(g,normalized(w,h,a),'A(t)','#ffca93',5.6);point(g,normalized(w,h,b),'B(t)','#ffca93',5.6);point(g,normalized(w,h,q),'B₂(t)','#87ffee',8);if(t>.01){const trace=[];for(let i=0;i<=Math.ceil(t*100);i++)trace.push(normalized(w,h,bez2(P,t*i/(Math.ceil(t*100)||1))));path(g,trace,'#abfff0',2.3,20)}}
-const updateQuad=sliderPlay({slider:'quadSlider',button:'quadPlay',model:quadModel,value:'quadValue',live:'quadLive'});dragPoints('quadCanvas',quadModel.pts);
+// 01/02: start with an empty canvas; each click adds a point or builds one construction step.
+function emptyStage(g,w,h){g.fillStyle='#070b15';g.fillRect(0,0,w,h);
+ const a=g.createRadialGradient(w*.48,h*.48,5,w*.48,h*.48,w*.65);
+ a.addColorStop(0,'#1b254433');a.addColorStop(1,'#05070f00');g.fillStyle=a;g.fillRect(0,0,w,h);}
+const lineModel={pts:[],t:.5,play:false};
+function drawLine(){const s=surface('lineCanvas');if(!s)return;const{g,w,h}=s;emptyStage(g,w,h);const P=lineModel.pts.map(p=>normalized(w,h,p));
+ if(P.length===2){
+ line(g,P[0],P[1],'#a487fe',2.4);const q=normalized(w,h,lerp(lineModel.pts[0],lineModel.pts[1],lineModel.t));
+ line(g,P[0],q,'#55e6fa',3.6);point(g,q,'L(t)','#70ffe0',7.5)}
+ P.forEach((p,i)=>point(g,p,'P'+i,i===0?'#ff9fdb':'#aeb7ff',8));
+}
+function sliderPlay({slider,button,model,value,live}){const el=$(slider),out=$(value),status=$(live),play=$(button);
+ el.oninput=()=>{model.t=+el.value;model.play=false;play.textContent='▶ 곡선 따라가기';out.textContent=status.textContent=f2(model.t)};
+ play.onclick=()=>{if(play.disabled)return;model.play=!model.play;play.textContent=model.play?'Ⅱ 멈춤':'▶ 곡선 따라가기'};
+ return dt=>{if(!model.play)return;model.t+=dt*.34;if(model.t>1)model.t=0;el.value=model.t;out.textContent=status.textContent=f2(model.t)}}
+const updateLine=sliderPlay({slider:'lineSlider',button:'linePlay',model:lineModel,value:'lineValue',live:'lineLive'});
+function lineSync(){const ready=lineModel.pts.length===2;
+ $('lineInstruction').textContent=!ready?'빈 화면을 클릭해 P'+lineModel.pts.length+'를 찍으세요.':'점을 끌어 위치를 바꾸거나 t를 움직여 보세요.';
+ $('lineSlider').disabled=!ready;$('linePlay').disabled=!ready;
+ $('lineSlider').value=lineModel.t;$('lineValue').textContent=$('lineLive').textContent=f2(lineModel.t);
+}
+$('lineReset').onclick=()=>{lineModel.pts.length=0;lineModel.t=.5;lineModel.play=false;$('linePlay').textContent='▶ 움직이기';lineSync()};
+const quadModel={pts:[],t:.5,play:false,stage:0};
+const quadStages=[
+ '빈 화면을 클릭해 P₀를 찍으세요.','두 번째 점 P₁를 찍으세요.','마지막 점 P₂를 찍으세요.',
+ '세 점을 찍었습니다. 화면이나 ‘다음 단계’를 누르세요.','P₀–P₁, P₁–P₂ 선분을 연결했습니다.',
+ 'P₀–P₁의 중점 A를 표시했습니다.','P₁–P₂의 중점 B를 표시했습니다.',
+ '두 중점 A와 B를 연결했습니다.','A–B의 중점 Q를 표시했습니다.',
+ 't를 0부터 1까지 움직여 Q(t)가 그리는 곡선을 확인하세요.'
+];
+function quadSync(){
+ const m=quadModel,complete=m.stage>=9,all=m.pts.length===3;
+ $('quadInstruction').textContent=quadStages[Math.min(9,m.stage)];
+ $('quadNext').disabled=!all||complete;$('quadNext').textContent=complete?'곡선 완성':'다음 단계 →';
+ $('quadSlider').disabled=!complete;$('quadPlay').disabled=!complete;
+ if(!complete){m.play=false;$('quadPlay').textContent='▶ 곡선 따라가기'}
+ $('quadSlider').value=m.t;$('quadValue').textContent=$('quadLive').textContent=f2(m.t);
+}
+function quadAdvance(){if(quadModel.pts.length!==3||quadModel.stage>=9)return;quadModel.stage++;quadSync()}
+function drawQuad(){const s=surface('quadCanvas');if(!s)return;const{g,w,h}=s,m=quadModel;emptyStage(g,w,h);
+ const P=m.pts,t=m.t,to=p=>normalized(w,h,p);
+ if(m.stage>=4){line(g,to(P[0]),to(P[1]),'#827fbdaa',1.8);line(g,to(P[1]),to(P[2]),'#827fbdaa',1.8)}
+ if(m.pts.length===3){
+ const a=lerp(P[0],P[1],t),b=lerp(P[1],P[2],t),q=lerp(a,b,t);
+ if(m.stage>=9){const curve=[];for(let i=0;i<=170;i++)curve.push(to(bez2(P,i/170)));rainbow(g,curve,4.8);
+ if(t>.003){const trace=[];for(let i=0;i<=90;i++)trace.push(to(bez2(P,i/90*t)));path(g,trace,'#a7ffe8',2.4,11)}}
+ if(m.stage>=7)line(g,to(a),to(b),'#80dfff',2.6);
+ if(m.stage>=5)point(g,to(a),'A','#ffbde7',7.6);
+ if(m.stage>=6)point(g,to(b),'B','#80c8fa',7.6);
+ if(m.stage>=8)point(g,to(q),'Q(t)','#a4ffe1',9.2);
+ }
+ P.forEach((p,i)=>point(g,to(p),'P'+i,'#bb9aff',8.3));
+}
+const updateQuad=sliderPlay({slider:'quadSlider',button:'quadPlay',model:quadModel,value:'quadValue',live:'quadLive'});
+$('quadNext').onclick=quadAdvance;
+$('quadReset').onclick=()=>{quadModel.pts.length=0;quadModel.stage=0;quadModel.t=.5;quadModel.play=false;quadSync()};
+function attachPointConstruction(id,model,maxCount,advance,sync,skipWhen3D=false){
+ const c=$(id);let tracking=false,dragging=-1,moved=false,startX=0,startY=0;
+ c.addEventListener('pointerdown',e=>{
+  if(skipWhen3D&&cubicView3d)return;
+  const p=pointerInside(e,c);startX=p.x;startY=p.y;moved=false;tracking=true;dragging=-1;
+  if(model.pts.length===maxCount){let closest=19;model.pts.forEach((q,i)=>{const v=normalized(p.w,p.h,q),d=Math.hypot(v.x-p.x,v.y-p.y);if(d<closest){closest=d;dragging=i}})}
+  c.setPointerCapture(e.pointerId);e.preventDefault();
+ });
+ c.addEventListener('pointermove',e=>{
+  if(skipWhen3D&&cubicView3d)return;
+  const p=pointerInside(e,c);
+  if(tracking){if(Math.hypot(p.x-startX,p.y-startY)>5)moved=true;
+   if(dragging>=0&&moved){const pos=denormalized(p.w,p.h,p.x,p.y);model.pts[dragging]={x:clamp(pos.x,.04,.96),y:clamp(pos.y,.04,.96)};c.style.cursor='grabbing'}}
+  else{const near=model.pts.some(q=>{const v=normalized(p.w,p.h,q);return Math.hypot(v.x-p.x,v.y-p.y)<19});c.style.cursor=near?'grab':'crosshair'}
+ });
+ const end=e=>{
+  if(!tracking)return;tracking=false;
+  if(skipWhen3D&&cubicView3d)return;
+  const p=pointerInside(e,c);
+  if(dragging<0&&!moved){
+   if(model.pts.length<maxCount){const pos=denormalized(p.w,p.h,p.x,p.y);model.pts.push({x:clamp(pos.x,.045,.955),y:clamp(pos.y,.045,.955)});if('stage'in model)model.stage=model.pts.length}
+   else if(advance)advance();
+  }
+  dragging=-1;c.style.cursor='crosshair';sync();
+ };
+ c.addEventListener('pointerup',end);
+ c.addEventListener('pointercancel',()=>{tracking=false;dragging=-1;c.style.cursor='crosshair'});
+}
+attachPointConstruction('lineCanvas',lineModel,2,null,lineSync);
+attachPointConstruction('quadCanvas',quadModel,3,quadAdvance,quadSync);
+$('lineSlider').value='0.5';$('quadSlider').value='0.5';lineSync();quadSync();
 // Cubic / De Casteljau
 const cubicInitial=[{x:.10,y:.83},{x:.28,y:.06},{x:.68,y:.89},{x:.91,y:.17}];
 const cubicModel={pts:cubicInitial.map(p=>({...p})),t:.43,play:false};
