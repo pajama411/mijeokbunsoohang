@@ -146,6 +146,20 @@ button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
 .code-actions{display:flex;gap:9px;justify-content:flex-end;padding:0 17px 13px}
 @media(max-width:780px){.lab-slide .layout{grid-template-columns:1fr}.lab-slide .h2{font-size:32px;margin:0 0 10px}.lab-slide .body{font-size:13px;margin-bottom:9px}.lab-slide .formula{font-size:12px;padding:8px 11px}.lab-slide .microline{margin-top:8px}.lab-viz{height:190px}.code-lab-viz{height:150px}.weight-legend{padding:8px 9px;gap:4px}.weight-legend span{font-size:9px;gap:3px}}
 @media(prefers-reduced-motion:reduce){.lab-stage:before{animation:none}}
+
+/* On-slide motion: staggered text / stage entrance / subtle glow */
+@keyframes slideCopyReveal{from{opacity:0;transform:translateY(18px);filter:blur(6px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes slideStageReveal{from{opacity:0;transform:translateX(25px) scale(.965);filter:blur(7px)}to{opacity:1;transform:translateX(0) scale(1);filter:blur(0)}}
+.slide.active .copy>.eyebrow{animation:slideCopyReveal .55s .05s both}
+.slide.active .copy>.h2,.slide.active .copy>.h1{animation:slideCopyReveal .68s .12s both}
+.slide.active .copy>.body{animation:slideCopyReveal .68s .21s both}
+.slide.active .copy>.formula,.slide.active .copy>.code-snippet,.slide.active .copy>.limit-line{animation:slideCopyReveal .7s .3s both}
+.slide.active .copy>.microline{animation:slideCopyReveal .7s .4s both}
+.slide.active .stage{animation:slideStageReveal .72s .15s both}
+.slide.active .ending-card{animation:slideCopyReveal .7s both}
+.slide.active .ending-card:nth-child(2){animation-delay:.15s}
+.slide.active .ending-card:nth-child(3){animation-delay:.3s}
+@media(prefers-reduced-motion:reduce){.slide.active .copy>*,.slide.active .stage,.slide.active .ending-card{animation:none!important;filter:none!important;transform:none!important}}
 </style>
 </head>
 <body>
@@ -172,7 +186,7 @@ button:disabled,input:disabled{opacity:.38;cursor:not-allowed!important}
 <!-- 02 -->
 <section class="slide lab-slide" data-seconds="23" data-chapter="웹 구현" data-note="이 발표는 PPT가 아니라 HTML, CSS, JavaScript로 만든 웹사이트입니다. HTML은 그래프와 버튼을 배치하고, CSS는 색과 전환 애니메이션을 담당합니다. JavaScript는 제어점 좌표를 받아 곡선을 계산하고 Canvas에 그립니다. 오른쪽 세 버튼을 클릭하면 각 역할을 확인할 수 있습니다.">
 <div class="layout"><div class="copy"><div class="eyebrow"><span class="beam"></span>01 / WEB STACK</div><h2 class="h2">이 발표 자체가<br><span class="spectrum">웹사이트입니다.</span></h2><p class="body"><strong>HTML</strong>은 구조, <strong>CSS</strong>는 디자인과 애니메이션, <strong>JavaScript</strong>는 계산과 클릭·드래그를 담당합니다.</p><div class="formula" id="stackExplanation">클릭 → 좌표 입력 → 계산 → Canvas 다시 그리기</div><div class="microline">HTML / CSS / JavaScript 버튼을 눌러 보세요.</div></div>
-<div class="stage lab-stage"><div class="stage-bar"><span>01 / INTERACTIVE WEB STACK</span><span class="live">● LIVE SYSTEM</span></div><div class="stack-tabs" role="group" aria-label="웹 기술 선택"><button type="button" class="stack-tab on" data-stack="html">HTML</button><button type="button" class="stack-tab" data-stack="css">CSS</button><button type="button" class="stack-tab" data-stack="js">JAVASCRIPT</button></div><div class="viz lab-viz"><div class="stage-meta">구조 → 스타일 → 계산</div><canvas id="stackCanvas" aria-label="HTML CSS JavaScript 역할을 설명하는 애니메이션"></canvas><div class="glass-label"><b id="stackLive">STRUCTURE</b></div></div><div class="lab-code"><span>LIVE CODE</span><code id="stackCode">&lt;canvas id="curve"&gt;&lt;/canvas&gt;</code></div></div></div></section>
+<div class="stage lab-stage"><div class="stage-bar"><span>01 / INTERACTIVE WEB STACK</span><span class="live">● LIVE SYSTEM</span></div><div class="stack-tabs" role="group" aria-label="웹 기술 선택"><button type="button" class="stack-tab on" data-stack="html">HTML</button><button type="button" class="stack-tab" data-stack="css">CSS</button><button type="button" class="stack-tab" data-stack="js">JAVASCRIPT</button></div><div class="viz lab-viz"><div class="stage-meta">구조 → 스타일 → 계산</div><canvas id="stackCanvas" aria-label="HTML CSS JavaScript 역할을 설명하는 애니메이션"></canvas><div class="glass-label"><b id="stackLive">STRUCTURE</b></div></div><div class="lab-code"><span>CODE EXAMPLE</span><code id="stackCode">&lt;canvas id="cubicCanvas"&gt;&lt;/canvas&gt;</code></div></div></div></section>
 <!-- 03 -->
 <section class="slide" data-seconds="25" data-chapter="직선 보간" data-note="점 두 개를 찍으면 당연히 직선입니다. 여기서 두 점 사이의 위치를 t로 정해 봅시다. 왼쪽에 1-t, 오른쪽에 t를 곱해서 더합니다. t가 0.5면 중점이죠.">
  <div class="layout">
@@ -326,7 +340,10 @@ function drawQuad(){const s=surface('quadCanvas');if(!s)return;const{g,w,h}=s,m=
  if(m.pts.length===3){
  const a=lerp(P[0],P[1],t),b=lerp(P[1],P[2],t),q=lerp(a,b,t);
  /* Show the full curve as soon as P₂ appears; midpoint construction follows. */
- {const curve=[];for(let i=0;i<=170;i++)curve.push(to(bez2(P,i/170)));rainbow(g,curve,4.8);
+ {const curve=[];for(let i=0;i<=170;i++)curve.push(to(bez2(P,i/170)));
+ path(g,curve,'#8d79ef52',2.1,6);
+ const reveal=clamp((performance.now()-(m.revealStart||0))/1250,0,1),visible=Math.max(2,Math.round(reveal*170));
+ rainbow(g,curve.slice(0,visible+1),4.8);
  if(m.stage>=9&&t>.003){const trace=[];for(let i=0;i<=90;i++)trace.push(to(bez2(P,i/90*t)));path(g,trace,'#a7ffe8',2.4,11)}}
  if(m.stage>=7)line(g,to(a),to(b),'#80dfff',2.6);
  if(m.stage>=5)point(g,to(a),'A','#ffbde7',7.6);
@@ -337,7 +354,7 @@ function drawQuad(){const s=surface('quadCanvas');if(!s)return;const{g,w,h}=s,m=
 }
 const updateQuad=sliderPlay({slider:'quadSlider',button:'quadPlay',model:quadModel,value:'quadValue',live:'quadLive'});
 $('quadNext').onclick=quadAdvance;
-$('quadReset').onclick=()=>{quadModel.pts.length=0;quadModel.stage=0;quadModel.t=.5;quadModel.play=false;quadSync()};
+$('quadReset').onclick=()=>{quadModel.pts.length=0;quadModel.stage=0;quadModel.t=.5;quadModel.play=false;quadModel.revealStart=0;quadSync()};
 // Clicks place the next point at a planned position so each presentation starts
 // with a readable example. After all points appear, the handles remain draggable.
 const presetConstructionPoints={
@@ -369,6 +386,7 @@ function attachPointConstruction(id,model,maxCount,advance,sync,skipWhen3D=false
     const planned=presetConstructionPoints[id][model.pts.length];
     model.pts.push({...planned});
     if('stage'in model)model.stage=model.pts.length;
+    if(model.pts.length===maxCount)model.revealStart=performance.now();
    }
    else if(advance)advance();
   }
@@ -461,7 +479,10 @@ function drawCubic(){
  const A=[lerp(P[0],P[1],t),lerp(P[1],P[2],t),lerp(P[2],P[3],t)];
  const D=[lerp(A[0],A[1],t),lerp(A[1],A[2],t)],Q=lerp(D[0],D[1],t);
  /* Show the full curve as soon as P₃ appears; midpoint construction follows. */
- if(show.curve){const curve=[];for(let i=0;i<=200;i++)curve.push(to(bez3(P,i/200)));rainbow(g,curve,4.9);
+ if(show.curve){const curve=[];for(let i=0;i<=200;i++)curve.push(to(bez3(P,i/200)));
+ path(g,curve,'#877bea52',2.1,6);
+ const reveal=clamp((performance.now()-(cubicModel.revealStart||0))/1400,0,1),visible=Math.max(2,Math.round(reveal*200));
+ rainbow(g,curve.slice(0,visible+1),4.9);
   if(k>=14&&t>.002){const trace=[];for(let i=0;i<=100;i++)trace.push(to(bez3(P,t*i/100)));path(g,trace,'#a9ffe7',2.7,16)}}
  if(k>=5&&show.control){for(let i=0;i<3;i++)line(g,to(P[i]),to(P[i+1]),'#8f92caa0',1.8,[6,4])}
  if(k>=9&&show.first){line(g,to(A[0]),to(A[1]),'#ffb5ddbe',2.1);line(g,to(A[1]),to(A[2]),'#ffb5ddbe',2.1)}
@@ -485,18 +506,18 @@ const updateCubic=dt=>updateCubicRaw(dt*cubicSpeed);
 attachPointConstruction('cubicCanvas',cubicModel,4,cubicAdvance,cubicSync,true);
 $('cubicReset').onclick=()=>{
  if(cubicView3d)setCubicView(false);
- cubicModel.pts.length=0;cubicModel.stage=0;cubicModel.t=.5;cubicModel.play=false;
+ cubicModel.pts.length=0;cubicModel.stage=0;cubicModel.t=.5;cubicModel.play=false;cubicModel.revealStart=0;
  $('cubicPlay').textContent='▶ 곡선 따라가기';cubicSync();
 };
 $('cubicRandom').onclick=()=>{
  if(cubicView3d)setCubicView(false);
  cubicModel.pts.length=0;
  for(let i=0;i<4;i++)cubicModel.pts.push({x:clamp(Math.random()*.78+.11,.06,.94),y:clamp(Math.random()*.78+.11,.06,.94)});
- cubicModel.stage=4;cubicModel.t=.5;cubicModel.play=false;cubicSync();
+ cubicModel.stage=4;cubicModel.t=.5;cubicModel.play=false;cubicModel.revealStart=performance.now();cubicSync();
 };
 $('cubicSpeed').oninput=e=>{cubicSpeed=+e.target.value;$('cubicSpeedOut').textContent=cubicSpeed.toFixed(2).replace(/0$/,'')+'×'};
 for(const box of document.querySelectorAll('[data-layer]'))box.addEventListener('change',()=>cubicLayers[box.dataset.layer]=box.checked);
-$('cubicShowAll').onclick=()=>{if(cubicModel.pts.length!==4){cubicModel.pts.length=0;cubicInitial.forEach(p=>cubicModel.pts.push({...p}))}cubicModel.stage=14;Object.keys(cubicLayers).forEach(k=>cubicLayers[k]=true);document.querySelectorAll('[data-layer]').forEach(box=>box.checked=true);cubicSync()};
+$('cubicShowAll').onclick=()=>{if(cubicModel.pts.length!==4){cubicModel.pts.length=0;cubicInitial.forEach(p=>cubicModel.pts.push({...p}))}cubicModel.stage=14;cubicModel.revealStart=performance.now()-1400;Object.keys(cubicLayers).forEach(k=>cubicLayers[k]=true);document.querySelectorAll('[data-layer]').forEach(box=>box.checked=true);cubicSync()};
 cubicSync();
 $('cubicFocus').onclick=()=>{
  const expanded=document.body.classList.toggle('cubic-focus');$('cubicFocus').textContent=expanded?'✕ 닫기':'⛶ 확대';
@@ -624,9 +645,9 @@ $('exportBtn').onclick=()=>{
 // Interactive lab 1: HTML/CSS/JS pipeline
 let stackMode='html',stackTime=0;
 const stackConfig={
- html:{label:'STRUCTURE',desc:'HTML: 그래프 영역과 버튼의 구조',code:'<canvas id="curve"></canvas>  <button>PLAY</button>'},
- css:{label:'STYLE + MOTION',desc:'CSS: 색, 빛, 화면 전환과 애니메이션',code:'.curve { animation: draw 2s ease-in-out; }'},
- js:{label:'CALCULATION',desc:'JavaScript: 입력받은 좌표로 곡선을 다시 계산',code:'P = bezier(controlPoints, t);  canvas.draw(P);'}
+ html:{label:'STRUCTURE',desc:'HTML: 그래프 영역과 버튼의 구조',code:'<canvas id="cubicCanvas"></canvas>  <button>PLAY</button>'},
+ css:{label:'STYLE + MOTION',desc:'CSS: 색, 빛, 화면 전환과 애니메이션',code:'.slide { animation: enter .45s cubic-bezier(.22,.7,.18,1); }'},
+ js:{label:'CALCULATION',desc:'JavaScript: 입력받은 좌표로 곡선을 다시 계산',code:'const Q = bez3(controlPoints, t);  drawCubic();'}
 };
 function selectStack(mode){
  stackMode=mode;
