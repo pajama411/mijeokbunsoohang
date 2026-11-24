@@ -621,6 +621,123 @@ $('exportBtn').onclick=()=>{
 };
 
 /* Bilingual display: keep Korean text and local edits intact, show English on demand. */
+// Interactive lab 1: HTML/CSS/JS pipeline
+let stackMode='html',stackTime=0;
+const stackConfig={
+ html:{label:'STRUCTURE',desc:'HTML: 그래프 영역과 버튼의 구조',code:'<canvas id="curve"></canvas>  <button>PLAY</button>'},
+ css:{label:'STYLE + MOTION',desc:'CSS: 색, 빛, 화면 전환과 애니메이션',code:'.curve { animation: draw 2s ease-in-out; }'},
+ js:{label:'CALCULATION',desc:'JavaScript: 입력받은 좌표로 곡선을 다시 계산',code:'P = bezier(controlPoints, t);  canvas.draw(P);'}
+};
+function selectStack(mode){
+ stackMode=mode;
+ document.querySelectorAll('[data-stack]').forEach(b=>b.classList.toggle('on',b.dataset.stack===mode));
+ $('stackExplanation').textContent=stackConfig[mode].desc;
+ $('stackLive').textContent=stackConfig[mode].label;
+ $('stackCode').textContent=stackConfig[mode].code;
+}
+document.querySelectorAll('[data-stack]').forEach(b=>b.onclick=()=>selectStack(b.dataset.stack));
+function drawStack(ts){
+ const s=surface('stackCanvas');if(!s)return;const{g,w,h}=s;
+ frame(g,w,h,false);
+ const modeIndex=['html','css','js'].indexOf(stackMode),cy=h*.51;
+ const centers=[{x:w*.17,y:cy},{x:w*.5,y:cy},{x:w*.83,y:cy}],labels=['HTML','CSS','JS'];
+ const phases=[.18,.5,.82],radius=Math.min(42,w*.088);
+ for(let i=0;i<2;i++){
+  const a=centers[i],b=centers[i+1];line(g,{x:a.x+radius,y:cy},{x:b.x-radius,y:cy},'#5674baaa',2);
+  const progress=((ts*.00036+i*.39)%1);
+  const mx=mix(a.x+radius,b.x-radius,progress);
+  g.save();g.shadowColor='#89fff0';g.shadowBlur=19;g.fillStyle='#a9ffe6';g.beginPath();g.arc(mx,cy,4.4,0,TAU);g.fill();g.restore();
+ }
+ for(let i=0;i<3;i++){
+  const p=centers[i],active=i===modeIndex,pulse=1+.06*Math.sin(ts*.003);
+  g.save();
+  g.shadowColor=active?'#9e7dff':'#5273cd';g.shadowBlur=active?37:12;
+  g.fillStyle=active?'#453579':'#111b34';
+  g.strokeStyle=active?'#c59bff':'#536287';g.lineWidth=active?2.5:1.2;
+  const r=radius*(active?pulse:1);g.beginPath();g.arc(p.x,p.y,r,0,TAU);g.fill();g.stroke();g.shadowBlur=0;
+  g.font='bold '+Math.max(12,Math.min(19,w*.027))+'px ui-monospace,monospace';g.textAlign='center';g.fillStyle=active?'#fff':'#a4bbdf';g.fillText(labels[i],p.x,p.y+6);
+  g.font='10px ui-monospace,monospace';g.fillStyle='#8898b8';
+  g.fillText(['STRUCTURE','ANIMATION','CALCULATION'][i],p.x,p.y+radius+24);
+  g.restore();
+ }
+ const q=clamp((ts%3700)/3700,0,1),flowpts=[
+  {x:mix(w*.18,w*.42,q),y:h*.19+Math.sin(q*TAU)*8},
+  {x:mix(w*.42,w*.82,q),y:h*.19+Math.sin(q*TAU)*8}
+ ];
+ path(g,flowpts,'#a27ffb33',1.4,10);
+ g.fillStyle='#8390b4';g.font='11px ui-monospace,monospace';
+ g.fillText('CLICK → COMPUTE → RENDER',Math.max(18,w*.30),h-18);
+}
+
+// Interactive lab 2: Bernstein basis; four weights always sum to one.
+const weightModel={t:.35,play:false};
+const weightColors=['#ff8acb','#bb8bff','#74c6ff','#85ffdc'];
+function weightBasis(t){const u=1-t;return[u*u*u,3*u*u*t,3*u*t*t,t*t*t]}
+function syncWeights(){
+ const v=weightBasis(weightModel.t),sum=v.reduce((a,b)=>a+b,0);
+ $('weightT').textContent=f2(weightModel.t);
+ $('weightValue').textContent=f2(weightModel.t);
+ $('weightSum').textContent=sum.toFixed(3);
+ v.forEach((x,i)=>{$('weight'+i).textContent=x.toFixed(3);$('weightBar'+i).style.width=(x*100).toFixed(2)+'%'});
+ $('weightSlider').value=weightModel.t;
+}
+$('weightSlider').oninput=e=>{weightModel.t=+e.target.value;weightModel.play=false;$('weightPlay').textContent='▶ 자동 재생';syncWeights()};
+$('weightPlay').onclick=()=>{weightModel.play=!weightModel.play;$('weightPlay').textContent=weightModel.play?'Ⅱ 일시 정지':'▶ 자동 재생'};
+function updateWeight(dt){if(weightModel.play){weightModel.t+=dt*.23;if(weightModel.t>=1)weightModel.t=0;syncWeights()}}
+function drawWeights(){
+ const s=surface('weightCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h,false);
+ const x0=42,x1=w-30,y0=26,y1=h-43,px=t=>mix(x0,x1,t),py=v=>mix(y1,y0,v);
+ for(let i=0;i<=4;i++){const x=px(i/4),y=py(i/4);line(g,{x,y:y0},{x,y:y1},'#ffffff11',1);line(g,{x:x0,y},{x:x1,y},'#ffffff11',1)}
+ for(let i=0;i<4;i++){
+  const data=[];for(let j=0;j<=100;j++){const t=j/100;data.push({x:px(t),y:py(weightBasis(t)[i])})}
+  path(g,data,weightColors[i],2.8,11);
+  const p={x:px(weightModel.t),y:py(weightBasis(weightModel.t)[i])};
+  point(g,p,'',weightColors[i],5);
+ }
+ const current=px(weightModel.t);
+ line(g,{x:current,y:y0},{x:current,y:y1},'#ffffffb0',1.5,[4,4]);
+ g.fillStyle='#a7b8d9';g.font='11px ui-monospace,monospace';g.fillText('WEIGHT',8,17);g.fillText('t →',w-55,h-15);
+}
+syncWeights();
+
+// Interactive lab 3: numerical CSS cubic-bezier to actual browser motion.
+const codeDefaults=[.42,0,.58,1],codeControls=['codeX1','codeY1','codeX2','codeY2'];
+const codeValue=()=>codeControls.map(k=>+$(k).value);
+function codeCurve(){const a=codeValue();return[{x:0,y:0},{x:a[0],y:a[1]},{x:a[2],y:a[3]},{x:1,y:1}]}
+const codeCss=()=>{const a=codeValue();return 'cubic-bezier('+a.map(v=>Number(v.toFixed(2))).join(', ')+')'};
+function syncCode(){
+ codeControls.forEach(k=>$(k+'Value').textContent=Number($(k).value).toFixed(2));
+ $('codeLabText').textContent=codeCss();
+}
+codeControls.forEach(k=>$(k).oninput=syncCode);
+$('codeReset').onclick=()=>{codeControls.forEach((k,i)=>$(k).value=codeDefaults[i]);syncCode();resetCodeRace()};
+function resetCodeRace(){for(const id of ['codeLinearDot','codeBezierDot']){const dot=$(id);dot.style.transition='none';dot.style.transform='translateX(0px)'}}
+$('codeRun').onclick=()=>{
+ resetCodeRace();
+ const a=$('codeLinearDot'),b=$('codeBezierDot');
+ void b.offsetWidth;
+ const track=b.parentElement,dist=Math.max(0,(track?.clientWidth||350)-15);
+ a.style.transition='transform 1900ms linear';
+ b.style.transition='transform 1900ms '+codeCss();
+ a.style.transform='translateX('+dist+'px)';
+ b.style.transform='translateX('+dist+'px)';
+};
+function drawCodeLab(ts){
+ const s=surface('codeLabCanvas');if(!s)return;const{g,w,h}=s;frame(g,w,h,false);
+ const p=codeCurve(),left=48,right=w-30,top=19,bottom=h-29;
+ const xx=t=>mix(left,right,t),yy=v=>mix(bottom,top,v/1.6),to=q=>({x:xx(q.x),y:yy(q.y)});
+ for(let i=0;i<=4;i++){line(g,{x:xx(i/4),y:top},{x:xx(i/4),y:bottom},'#ffffff17',1)}
+ for(let i=0;i<=4;i++){const y=yy(i*.4);line(g,{x:left,y},{x:right,y},'#ffffff14',1)}
+ line(g,to(p[0]),to(p[1]),'#ffb0eb9f',1.5,[5,5]);
+ line(g,to(p[2]),to(p[3]),'#99bbff9f',1.5,[5,5]);
+ const curve=[];for(let i=0;i<=130;i++)curve.push(to(bez3(p,i/130)));
+ rainbow(g,curve,3.8);
+ point(g,to(p[1]),'P₁','#ffabdc',6.8);point(g,to(p[2]),'P₂','#8cffeb',6.8);
+ const tt=(ts*.00024)%1,now=to(bez3(p,tt));point(g,now,'','#fff',4.1);
+ g.fillStyle='#96a8c3';g.font='10px ui-monospace,monospace';g.fillText('TIME →',w-80,h-10);
+}
+syncCode();
+
 const englishNotes=[
  'I will show how a Bézier curve is constructed by placing points and taking midpoints.',
  'Click twice to place two points. L(t)=(1−t)P0+tP1. At t=0.5 the moving point is the midpoint.',
@@ -630,6 +747,9 @@ const englishNotes=[
  'CSS cubic-bezier uses a curve to control progress over time, changing the instantaneous rate of motion.',
  'I learned that repeated interpolation creates a curve and that a derivative explains its instantaneous slope. Thank you.'
 ];
+englishNotes.splice(1,0,'This is a live web presentation. HTML provides structure; CSS styles and animates; JavaScript computes the Bézier curve and handles interactions.');
+englishNotes.splice(5,0,'The four Bernstein weights are nonnegative and their sum is always 1. Move t to see each control point influence the curve differently.');
+englishNotes.splice(8,0,'Edit four cubic-bezier coordinates. The code and graph update instantly, and the browser uses the CSS easing for the motion demo.');
 const englishCopy=[
  {'.hero h1':'THE ART<br>OF A<br><span class="spectrum">CURVE.</span>','.hero .body':'Create a curve from moving lines.<br><strong>Explain its change with Calculus I.</strong>','.hero-bottom':'2022 CALCULUS I &nbsp; <span>×</span> &nbsp; BÉZIER CURVES'},
  {'.copy .h2':'Joining two points<br>makes <span class="spectrum">a straight line.</span>','.copy .body':'Take <strong>(1−t) times the left endpoint + t times the right endpoint</strong>. As t moves from 0 to 1, the new point travels along the line.','.copy .microline':'CALCULUS I · linear function · constant rate of change','.copy .math-tag':'LINEAR INTERPOLATION'},
@@ -639,6 +759,9 @@ const englishCopy=[
  {'.copy .h2':'Calculus in action.<br><span class="spectrum">Designing motion.</span>','.copy .body':'CSS uses Bézier curves to control <strong>progress over time</strong>. The slope of the progress curve describes the <strong>instantaneous rate of change</strong>.','.copy .microline':'DRAG THE TWO CONTROL HANDLES'},
  {'.ending h2':'From lines to curves.<br><span class="spectrum">Explained through calculus.</span>','.ending-card:nth-child(1) .num':'01 · WHAT I LEARNED','.ending-card:nth-child(1) h3':'Curves are repeated interpolation','.ending-card:nth-child(1) p':'Repeating a simple linear calculation creates Bézier curves described by quadratic and cubic polynomials.','.ending-card:nth-child(2) .num':'02 · CALCULUS I CONNECTION','.ending-card:nth-child(2) h3':'Derivatives explain change','.ending-card:nth-child(2) p':'The average rate approaches the instantaneous rate; a cubic polynomial can be differentiated to find the slope of its tangent.','.ending-card:nth-child(3) .num':'03 · REFLECTION','.ending-card:nth-child(3) h3':'Math is part of visual design','.ending-card:nth-child(3) p':'By moving control points and watching the curve and derivative change together, I realized that calculus can explain what we see on a screen.'}
 ];
+englishCopy.splice(1,0,{'.copy .h2':'This presentation is<br><span class="spectrum">a real website.</span>','.copy .body':'HTML handles <strong>structure</strong>, CSS handles <strong>design and animation</strong>, and JavaScript handles <strong>math and interaction</strong>.'});
+englishCopy.splice(5,0,{'.copy .h2':'Four control points,<br><span class="spectrum">different weights.</span>','.copy .body':'These are the Bernstein basis weights. They change with t, but their sum is always <strong>one</strong>.'});
+englishCopy.splice(8,0,{'.copy .h2':'Four numbers control<br><span class="spectrum">the motion.</span>','.copy .body':'Change cubic-bezier(x1,y1,x2,y2) and generate live CSS.'});
 const englishUI={
  '#cubicLayers label:nth-child(1) span':'Curve',
  '#cubicLayers label:nth-child(2) span':'Control polygon',
@@ -651,9 +774,9 @@ const englishUI={
  '.chart-tabs .chart-tab:nth-child(1)':"f′(t) curve",
  '.chart-tabs .chart-tab:nth-child(2)':'Δt error',
  '.chart-tabs .chart-tab:nth-child(3)':'Compare slopes',
- '.slide:nth-child(5) .calc-controls .controls:nth-child(1) label':'Position t',
+ '.slide:nth-child(7) .calc-controls .controls:nth-child(1) label':'Position t',
  '.slide:nth-child(5) .calc-controls .controls:nth-child(2) label':'Gap Δt → 0',
- '.slide:nth-child(7) .ease-bottom .small':'Same time · different rate of change'
+ '.slide:nth-child(8) .ease-bottom .small':'Same time · different rate of change'
 };
 let translationBackup=[];
 function switchLang(){
@@ -678,7 +801,7 @@ $('langBtn').onclick=switchLang;
 readEdits();syncNotes();
 
 let last=0;const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-function tick(ts){const dt=Math.min(.06,(ts-last)/1000||.016);last=ts;renderTime(ts);if(!reduce){if(page===1)updateLine(dt);if(page===2)updateQuad(dt);if(page===3)updateCubic(dt)}if(page===0)hero(reduce?0:ts);else if(page===1)drawLine();else if(page===2)drawQuad();else if(page===3)drawCubic();else if(page===4){drawCalc();drawDerivative()}else if(page===5)drawEase(ts);requestAnimationFrame(tick)}
+function tick(ts){const dt=Math.min(.06,(ts-last)/1000||.016);last=ts;renderTime(ts);if(!reduce){if(page===2)updateLine(dt);if(page===3)updateQuad(dt);if(page===4)updateCubic(dt);if(page===5)updateWeight(dt)}if(page===0)hero(reduce?0:ts);else if(page===1)drawStack(reduce?0:ts);else if(page===2)drawLine();else if(page===3)drawQuad();else if(page===4)drawCubic();else if(page===5)drawWeights();else if(page===6){drawCalc();drawDerivative()}else if(page===7)drawEase(reduce?0:ts);else if(page===8)drawCodeLab(reduce?0:ts);requestAnimationFrame(tick)}
 requestAnimationFrame(tick);
 </script>
 </body>
